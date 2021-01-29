@@ -1,4 +1,4 @@
-# Project
+# NTTTCP
 
 A Windows network throughput benchmark tool.
 
