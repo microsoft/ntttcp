@@ -2,6 +2,8 @@
 
 A Windows network throughput benchmark tool.
 
+See Releases section for binaries.
+
 
 ## Trademarks
 
