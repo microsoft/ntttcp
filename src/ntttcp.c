@@ -46,7 +46,6 @@ typedef struct _FLAGS {
     BOOL udp_flag;
     BOOL use_ipv6_flag;
     BOOL use_hvsocket_flag;
-    BOOL vista_plus_flag;
     BOOL xml_flag;
     BOOL wait_all_flag;
     BOOL wsa_flag;
@@ -327,6 +326,7 @@ volatile long worker_error_code = NO_ERROR;
 long long num_buffers_to_send = 20 * 1024;
 long buffers_length = 64 * 1024;
 long send_socket_buff = -1;
+long recv_socket_buff = -1;
 long port = 5001;
 long num_threads_total = 0;
 long num_mappings = 0;
@@ -345,7 +345,6 @@ long num_samples = 1;
 long jitter_packet_period = 0;
 long node_affinity = -1;
 long udp_uso_size = 0;
-long recv_socket_buff = 0;
 long num_processors = 0;
 LARGE_INTEGER machine_frequency = {0};
 ULONGLONG machine_frequency_network_order = 0;
@@ -1207,28 +1206,9 @@ SetDefaultFlags(
     )
 {
     int err = NO_ERROR;
-    int i = 0;
-    OSVERSIONINFO os_version = {0};
     SYSTEM_INFO sbi = {0};
 
-    os_version.dwOSVersionInfoSize = sizeof(os_version);
-    if (!GetVersionEx(&os_version)) {
-        PrintError(__FUNCTION__, "error in GetVersionEx");
-        return GetLastError();
-    }
-
-    if (os_version.dwMajorVersion < 6) {
-        /* For OSes prior to Vista, default to setting SO_RCVBUF to 64KB */
-        recv_socket_buff = 64 * 1024;
-    } else {
-        /* For Vista and later, default to not setting SO_RCVBUF */
-        recv_socket_buff = -1;
-
-        // Functions like QueryIdleProcessorCycleTime are supported in this release.
-        flags.vista_plus_flag = TRUE;
-    }
-
-    for (i = 0; i < MAX_MAPPINGS; ++i) {
+    for (int i = 0; i < MAX_MAPPINGS; ++i) {
         mappings[i] = NULL;
         maps[i].threads = 0;
         maps[i].proc = 0;
@@ -1383,35 +1363,38 @@ InitDLLs(
         goto error_get_proc_address;
     }
 
-    if (flags.vista_plus_flag) {
-        if (NULL != Kernel32ModuleHandle) {
-            lpQueryIdleProcessorCycleTime = GetProcAddress(Kernel32ModuleHandle, "QueryIdleProcessorCycleTime");
-        } else if (NULL != CoreRealtimeModuleHandle) {
-            lpQueryIdleProcessorCycleTime = GetProcAddress(CoreRealtimeModuleHandle, "QueryIdleProcessorCycleTime");
-        }
-        if (NULL == lpQueryIdleProcessorCycleTime) {
-            goto error_get_proc_address;
-        }
-        lpGetTcp6Table = GetProcAddress(IPHlpModuleHandle, "GetTcp6Table");
-        if (NULL == lpGetTcp6Table) {
-            goto error_get_proc_address;
-        }
-        lpSetPerTcp6ConnectionEStats = GetProcAddress(IPHlpModuleHandle, "SetPerTcp6ConnectionEStats");
-        if (NULL == lpSetPerTcp6ConnectionEStats) {
-            goto error_get_proc_address;
-        }
-        lpGetPerTcp6ConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcp6ConnectionEStats");
-        if (NULL == lpGetPerTcp6ConnectionEStats) {
-            goto error_get_proc_address;
-        }
-        lpSetPerTcpConnectionEStats = GetProcAddress(IPHlpModuleHandle, "SetPerTcpConnectionEStats");
-        if (NULL == lpSetPerTcpConnectionEStats) {
-            goto error_get_proc_address;
-        }
-        lpGetPerTcpConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcpConnectionEStats");
-        if (NULL == lpGetPerTcpConnectionEStats) {
-            goto error_get_proc_address;
-        }
+    if (NULL != Kernel32ModuleHandle) {
+        lpQueryIdleProcessorCycleTime = GetProcAddress(Kernel32ModuleHandle, "QueryIdleProcessorCycleTime");
+    } else if (NULL != CoreRealtimeModuleHandle) {
+        lpQueryIdleProcessorCycleTime = GetProcAddress(CoreRealtimeModuleHandle, "QueryIdleProcessorCycleTime");
+    }
+    if (NULL == lpQueryIdleProcessorCycleTime) {
+        goto error_get_proc_address;
+    }
+
+    lpGetTcp6Table = GetProcAddress(IPHlpModuleHandle, "GetTcp6Table");
+    if (NULL == lpGetTcp6Table) {
+        goto error_get_proc_address;
+    }
+
+    lpSetPerTcp6ConnectionEStats = GetProcAddress(IPHlpModuleHandle, "SetPerTcp6ConnectionEStats");
+    if (NULL == lpSetPerTcp6ConnectionEStats) {
+        goto error_get_proc_address;
+    }
+
+    lpGetPerTcp6ConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcp6ConnectionEStats");
+    if (NULL == lpGetPerTcp6ConnectionEStats) {
+        goto error_get_proc_address;
+    }
+
+    lpSetPerTcpConnectionEStats = GetProcAddress(IPHlpModuleHandle, "SetPerTcpConnectionEStats");
+    if (NULL == lpSetPerTcpConnectionEStats) {
+        goto error_get_proc_address;
+    }
+
+    lpGetPerTcpConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcpConnectionEStats");
+    if (NULL == lpGetPerTcpConnectionEStats) {
+        goto error_get_proc_address;
     }
 
     goto exit;
@@ -1850,10 +1833,6 @@ VerifyArgs(
         PrintError(__FUNCTION__,
                    "full read flag supported only in synchronous mode or with "
                    "WSA flag");
-    } else if (flags.cpu_from_idle_flag && !flags.vista_plus_flag) {
-        PrintError(__FUNCTION__, "-cfi can only be used in OSes which are Vista or higher.");
-    } else if (flags.get_estats && !flags.vista_plus_flag) {
-        PrintError(__FUNCTION__, "-es can only be used in OSes which are Vista or higher.");
     } else if (0 >= num_mappings) {
         PrintError(__FUNCTION__, "Option: -m <mapping> is missing");
     } else if (flags.bind_sender_flag && !flags.send_flag) {

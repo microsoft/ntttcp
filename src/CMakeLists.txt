@@ -26,8 +26,9 @@ target_include_directories(ntttcp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_options(ntttcp PUBLIC /WX /W3 /sdl /permissive- /guard:cf /Zi)
 
-target_compile_definitions(ntttcp PUBLIC UNICODE _UNICODE)
+target_compile_definitions(ntttcp PUBLIC _CRT_SECURE_NO_WARNINGS) # Allow strtok, fopen, _ftime64.
+target_compile_definitions(ntttcp PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS) # Allow WSAAddressToStringA.
 
-target_link_libraries(ntttcp PUBLIC ws2_32 iphlpapi)
+target_link_libraries(ntttcp PUBLIC ws2_32 iphlpapi winmm)
 
 target_link_options(ntttcp PUBLIC /OPT:REF /OPT:ICF /INCREMENTAL:NO /DEBUG:FULL)
