@@ -4,6 +4,18 @@ A Windows network throughput benchmark tool.
 
 See Releases section for binaries.
 
+# Building
+
+In a command prompt in the src directory run the following. Cmake 3.15 at minimum is required.
+
+```
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
+The binary will be at `build/Release/ntttcp.exe`
 
 ## Trademarks
 
