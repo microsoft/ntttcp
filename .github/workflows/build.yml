@@ -27,5 +27,5 @@ jobs:
       with:
         name: bin
         path: |
-          src/build/**/*.pdb
-          src/build/**/*.exe
+          src/build/Release/*.pdb
+          src/build/Release/*.exe
