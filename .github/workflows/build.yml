@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+permissions: read-all
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    name: Build
+    runs-on: ${{ matrix.os }}-latest
+    steps:
+      uses: actions/checkout@629c2de402a417ea7690ca6ce3f33229e27606a5
+    - name: Build (Windows)
+      run: |
+        mkdir build && cd build
+        cmake ..
+        cmake --build . --config Release
+    - name: Upload
+      uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
+      with:
+        name: bin
+        path: |
+          build/**/*.pdb
+          build/**/*.exe
