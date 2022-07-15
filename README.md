@@ -1,10 +1,10 @@
 # NTTTCP
 
+[![Build](https://github.com/microsoft/ntttcp/actions/workflows/build.yml/badge.svg)](https://github.com/microsoft/ntttcp/actions/workflows/build.yml)
+
 A Windows network throughput benchmark tool.
 
 ## Building
-
-[![Build](https://github.com/microsoft/ntttcp/actions/workflows/build.yml/badge.svg)](https://github.com/microsoft/ntttcp/actions/workflows/build.yml)
 
 In a command prompt in the `src` directory run the following:
 
