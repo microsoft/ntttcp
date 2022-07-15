@@ -4,6 +4,8 @@
 
 A Windows network throughput benchmark tool.
 
+See [Releases](https://github.com/microsoft/ntttcp/releases) section for binaries.
+
 ## Building
 
 In a command prompt in the `src` directory run the following:
