@@ -1,12 +1,16 @@
 # NTTTCP
 
+[![Build](https://github.com/microsoft/ntttcp/actions/workflows/build.yml/badge.svg)](https://github.com/microsoft/ntttcp/actions/workflows/build.yml)
+
 A Windows network throughput benchmark tool.
 
-See Releases section for binaries.
+See [Releases](https://github.com/microsoft/ntttcp/releases) section for binaries.
 
-# Building
+## Building
 
-In a command prompt in the src directory run the following. Cmake 3.15 at minimum is required.
+In a command prompt in the `src` directory run the following:
+
+> **Note** - Cmake 3.15 at minimum is required.
 
 ```
 mkdir build
