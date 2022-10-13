@@ -2,7 +2,7 @@
 Copyright (c) Microsoft Corporation.
 */
 
-#define NTTTCP_VERSION "5.38"
+#define NTTTCP_VERSION "5.39"
 
 #include <assert.h>
 #define INCL_WINSOCK_API_TYPEDEFS 1
@@ -44,6 +44,7 @@ typedef struct _FLAGS {
     BOOL send_flag;
     BOOL time_flag;
     BOOL udp_flag;
+    BOOL udp_unconnected_flag;
     BOOL use_ipv6_flag;
     BOOL use_hvsocket_flag;
     BOOL xml_flag;
@@ -1601,6 +1602,7 @@ PrintUsage(
     printf("\t-uso <Message size> Enable UDP segmentation offload with this maximum\n");
     printf("\t     message size.\n");
     printf("\t-uro Enable UDP receive coalescing.\n");
+    printf("\t-uc  Use unconnected UDP sockets and sendto/recvfrom.\n");
     printf("\t-x   <PacketArray size>         [default: 1]\n");
     printf("\t     Use TransmitPackets, calling it with the given packet array size.\n");
     printf("\t-hv  Use AF_HYPERV. Host names must be VM GUIDs\n");
@@ -1668,6 +1670,7 @@ PrintFlags(
     printf("%s: %d\n", "use_ipv6_flag", flags.use_ipv6_flag);
     printf("%s: %d\n", "send_flag", flags.send_flag);
     printf("%s: %d\n", "udp_flag", flags.udp_flag);
+    printf("%s: %d\n", "udp_unconnected_flag", flags.udp_unconnected_flag);
     printf("%s: %d\n", "verify_data_flag", flags.verify_data_flag);
     printf("%s: %d\n", "wait_all_flag", flags.wait_all_flag);
     printf("%s: %d\n", "run_time", run_time);
@@ -1883,6 +1886,10 @@ VerifyArgs(
         PrintError(__FUNCTION__, "-uso requires -s and -u");
     } else if (flags.udp_receive_coalescing && (flags.send_flag || !flags.udp_flag)) {
         PrintError(__FUNCTION__, "-uro requires -r and -u");
+    } else if (flags.udp_unconnected_flag && !flags.udp_flag) {
+        PrintError(__FUNCTION__, "unconnected UDP requires UDP");
+    } else if (flags.udp_unconnected_flag && flags.async_flag) {
+        PrintError(__FUNCTION__, "no support for async unconnected UDP");
     } else {
         ret = TRUE;
     }
@@ -2198,6 +2205,9 @@ ProcessArgs(
             }
         } else if (0 == _stricmp(argv[i], "-uro")) {
             flags.udp_receive_coalescing = TRUE;
+            ++i;
+        } else if (0 == _stricmp(argv[i], "-uc")) {
+            flags.udp_unconnected_flag = TRUE;
             ++i;
         } else if (0 == _stricmp(argv[i], "-hv")) {
             flags.use_hvsocket_flag = TRUE;
@@ -2595,6 +2605,7 @@ SetupNet(
     _In_ const BOOL use_ipv6_flag,
     _In_ const BOOL send_flag,
     _In_ const BOOL udp_flag,
+    _In_ const BOOL udp_unconnected_flag,
     _In_ const BOOL roundtrip_flag,
     _In_ const BOOL bind_sender_flag,
     _In_ const int backlog,
@@ -2768,7 +2779,7 @@ SetupNet(
 
             if (use_hvsocket_flag) {
                 err = connect(sd, (PSOCKADDR)&sockAddrHv, sizeof(sockAddrHv));
-            } else {
+            } else if (!udp_unconnected_flag) {
                 err = connect(sd,
                               (PSOCKADDR) receiver_addr_info->ai_addr,
                               (int) receiver_addr_info->ai_addrlen);
@@ -2900,7 +2911,7 @@ SendReceiveToken(
 
     socket = SetupNet(reveiver_name, sender_name, token_port,
         flags.use_hvsocket_flag, flags.use_ipv6_flag, flags.send_flag, FALSE,
-        FALSE, flags.bind_sender_flag, 0, TRUE);
+        FALSE, FALSE, flags.bind_sender_flag, 0, TRUE);
     if (INVALID_SOCKET == socket) {
         err = ERROR_SETUP_NET;
         goto exit;
@@ -3201,7 +3212,7 @@ DoSendsReceives(
 
     // Use sendto()\recvfrom() for UDP traffic to ensure compatibility with
     // roundtrip mode processing. Setup address information structure here.
-    if (flags.udp_flag && flags.roundtrip) {
+    if (flags.udp_flag && (flags.roundtrip || flags.udp_unconnected_flag)) {
         if (flags.send_flag) {
             // Set the receiver address informaton.
             err = GetHostInfoByName(php->receiver_name, php->port, TRUE, &addr_info);
@@ -3265,7 +3276,7 @@ DoSendsReceives(
                 }
             }
 
-            if (flags.udp_flag && flags.roundtrip) {
+            if (flags.udp_flag && (flags.roundtrip || flags.udp_unconnected_flag)) {
                 bytes_sent =
                     sendto(socket, buffer, buffer_length, io_flags, addr_info->ai_addr, (int)addr_info->ai_addrlen);
             } else {
@@ -3288,7 +3299,7 @@ DoSendsReceives(
         } else {
             ASSERT(state == S_RECV);
 
-            if (flags.udp_flag && flags.roundtrip) {
+            if (flags.udp_flag && (flags.roundtrip || flags.udp_unconnected_flag)) {
                 bytes_received =
                     recvfrom(socket, recv_buffer, buffer_length, io_flags, addr_info->ai_addr, (int*)&addr_info->ai_addrlen);
             } else {
@@ -4011,7 +4022,7 @@ StartSenderReceiver(
         //
         SOCKET socket = SetupNet(php->receiver_name, php->sender_name, php->port,
                                  flags.use_hvsocket_flag, FALSE, TRUE, FALSE, FALSE,
-                                 flags.bind_sender_flag, 0, FALSE);
+                                 FALSE, flags.bind_sender_flag, 0, FALSE);
         if (INVALID_SOCKET != socket) {
             VMSG("getting data port from receiver\n");
             int ret = recv(socket, (char*)&php->port, sizeof(php->port), MSG_WAITALL);
@@ -4040,8 +4051,8 @@ StartSenderReceiver(
 
     sd = SetupNet(php->receiver_name, php->sender_name, php->port,
                   flags.use_hvsocket_flag, flags.use_ipv6_flag,
-                  flags.send_flag, flags.udp_flag, flags.roundtrip,
-                  flags.bind_sender_flag, 0, TRUE);
+                  flags.send_flag, flags.udp_flag, flags.udp_unconnected_flag,
+                  flags.roundtrip, flags.bind_sender_flag, 0, TRUE);
 
     if (INVALID_SOCKET == sd) {
         err = ERROR_SETUP_NET;
@@ -4353,7 +4364,7 @@ DoWork(
         //
         long port_buffer = port + 1;
         SOCKET listening_socket = SetupNet(maps[0].receiver_name, sender_name, port,
-            flags.use_hvsocket_flag, FALSE, FALSE, FALSE, FALSE,
+            flags.use_hvsocket_flag, FALSE, FALSE, FALSE, FALSE, FALSE,
             flags.bind_sender_flag, num_threads_total, FALSE);
         for (int i = 0; i < num_threads_total; ++i) {
             SOCKET socket = accept(listening_socket, NULL, 0);
@@ -4857,6 +4868,9 @@ PrintOutput(
         fprintf(XMLFileHandle,
                 "\t\t<udp>%s</udp>\n",
                 (flags.udp_flag ? "True" : "False"));
+        fprintf(XMLFileHandle,
+                "\t\t<udp_unconnected>%s</udp_unconnected>\n",
+                (flags.udp_unconnected_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
                 "\t\t<verify_data>%s</verify_data>\n",
                 (flags.verify_data_flag ? "True" : "False"));
