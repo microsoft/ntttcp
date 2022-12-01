@@ -29,10 +29,10 @@ typedef struct _ASYNCH_BUFFER {
     long length;
     char* buffer;
     WSABUF* wsa_buffer;
-    TRANSMIT_PACKETS_ELEMENT * packets;
+    TRANSMIT_PACKETS_ELEMENT* packets;
     LARGE_INTEGER time_perf_count_0;
     LARGE_INTEGER time_perf_count_1;
-} ASYNCH_BUFFER, *PASYNCH_BUFFER;
+} ASYNCH_BUFFER, * PASYNCH_BUFFER;
 
 typedef struct _FLAGS {
     BOOL sync_port;
@@ -65,12 +65,14 @@ typedef struct _FLAGS {
     BOOL roundtrip;
     BOOL hide_per_thread_stats;
     BOOL udp_receive_coalescing;
-} FLAGS, *PFLAGS;
+    BOOL group_aware;
+} FLAGS, * PFLAGS;
 
 // Worker thread context (with 1 session per worker thread)
 typedef struct _PHP {
     int index;
     int proc;
+    WORD group;
     int port;
     PCHAR receiver_name;
     PCHAR sender_name;
@@ -81,18 +83,19 @@ typedef struct _PHP {
     HANDLE worker_synched;
     HANDLE worker_finished;
     HANDLE abort_ios;
-} PHP, *PPHP;
+} PHP, * PPHP;
 
 typedef struct _MAP {
     int threads;
     int proc;
+    WORD group;
     PCHAR receiver_name;
-} MAP, *PMAP;
+} MAP, * PMAP;
 
 typedef struct _CPU_UTIL_INFO {
     ULONG buffer_length;
     PULONG64 processor_idle_cycle_time;
-} CPU_UTIL_INFO, *PCPU_UTIL_INFO;
+} CPU_UTIL_INFO, * PCPU_UTIL_INFO;
 
 typedef struct _TCP_PACKETS_STATS {
     unsigned long long sent;
@@ -113,18 +116,18 @@ typedef struct _UDP_PACKETS_STATS {
 // ROD - Read Only Dynamic
 // RW  - Read / Write
 typedef struct _ESTATS_DATA {
-   BOOL is_valid_data;
-   TCP_ESTATS_SYN_OPTS_ROS_v0 tcp_estats_syn_opts_ros;
-   TCP_ESTATS_SND_CONG_ROS_v0 tcp_estats_snd_cong_ros;
-   TCP_ESTATS_DATA_ROD_v0 tcp_estats_data_rod;
-   TCP_ESTATS_SND_CONG_ROD_v0 tcp_estats_snd_cong_rod;
-   TCP_ESTATS_PATH_ROD_v0 tcp_estats_path_rod;
-   TCP_ESTATS_SEND_BUFF_ROD_v0 tcp_estats_send_buff_rod;
-   TCP_ESTATS_REC_ROD_v0 tcp_estats_rec_rod;
-   TCP_ESTATS_OBS_REC_ROD_v0 tcp_estats_obs_rec_rod;
-   TCP_ESTATS_BANDWIDTH_ROD_v0 tcp_estats_bandwidth_rod;
-   TCP_ESTATS_FINE_RTT_ROD_v0 tcp_estats_fine_rtt_rod;
-} ESTATS_DATA, *PESTATS_DATA;
+    BOOL is_valid_data;
+    TCP_ESTATS_SYN_OPTS_ROS_v0 tcp_estats_syn_opts_ros;
+    TCP_ESTATS_SND_CONG_ROS_v0 tcp_estats_snd_cong_ros;
+    TCP_ESTATS_DATA_ROD_v0 tcp_estats_data_rod;
+    TCP_ESTATS_SND_CONG_ROD_v0 tcp_estats_snd_cong_rod;
+    TCP_ESTATS_PATH_ROD_v0 tcp_estats_path_rod;
+    TCP_ESTATS_SEND_BUFF_ROD_v0 tcp_estats_send_buff_rod;
+    TCP_ESTATS_REC_ROD_v0 tcp_estats_rec_rod;
+    TCP_ESTATS_OBS_REC_ROD_v0 tcp_estats_obs_rec_rod;
+    TCP_ESTATS_BANDWIDTH_ROD_v0 tcp_estats_bandwidth_rod;
+    TCP_ESTATS_FINE_RTT_ROD_v0 tcp_estats_fine_rtt_rod;
+} ESTATS_DATA, * PESTATS_DATA;
 
 typedef struct DECLSPEC_CACHEALIGN _THREAD_PERF_INFO {
     long sum_latency;
@@ -136,7 +139,7 @@ typedef struct DECLSPEC_CACHEALIGN _THREAD_PERF_INFO {
     BOOL estats_available;
     PESTATS_DATA test_begin_estats;
     PESTATS_DATA test_end_estats;
-} THREAD_PERF_INFO, *PTHREAD_PERF_INFO;
+} THREAD_PERF_INFO, * PTHREAD_PERF_INFO;
 
 typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
     LARGE_INTEGER IdleTime;
@@ -145,7 +148,7 @@ typedef struct _SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION {
     LARGE_INTEGER DpcTime;          // DEVL only
     LARGE_INTEGER InterruptTime;    // DEVL only
     ULONG InterruptCount;
-} SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION, *PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION;
+} SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION, * PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION;
 
 typedef struct _SYSTEM_INTERRUPT_INFORMATION {
     ULONG ContextSwitches;
@@ -154,7 +157,7 @@ typedef struct _SYSTEM_INTERRUPT_INFORMATION {
     ULONG TimeIncrement;
     ULONG DpcBypassCount;
     ULONG ApcBypassCount;
-} SYSTEM_INTERRUPT_INFORMATION, *PSYSTEM_INTERRUPT_INFORMATION;
+} SYSTEM_INTERRUPT_INFORMATION, * PSYSTEM_INTERRUPT_INFORMATION;
 
 typedef struct DECLSPEC_CACHEALIGN _PERF_INFO {
     time_t expected_run_time;
@@ -170,7 +173,7 @@ typedef struct DECLSPEC_CACHEALIGN _PERF_INFO {
     TCP_PACKETS_STATS tcp_end_stats;
     UDP_PACKETS_STATS udp_init_stats;
     UDP_PACKETS_STATS udp_end_stats;
-} PERF_INFO, *PPERF_INFO;
+} PERF_INFO, * PPERF_INFO;
 
 typedef struct _EVENTS_SYNCH {
     HANDLE waiting_event;
@@ -178,30 +181,30 @@ typedef struct _EVENTS_SYNCH {
 } EVENTS_SYNCH;
 
 // typedefs for qWave functions
-typedef BOOL (CALLBACK *LPFN_QOSCREATEHANDLE) (
+typedef BOOL(CALLBACK* LPFN_QOSCREATEHANDLE) (
     PQOS_VERSION Version,
     PHANDLE QOSHandle
-);
+    );
 
-typedef BOOL (CALLBACK *LPFN_QOSCLOSEHANDLE) (
+typedef BOOL(CALLBACK* LPFN_QOSCLOSEHANDLE) (
     HANDLE QOSHandle
-);
+    );
 
-typedef BOOL (CALLBACK *LPFN_QOSADDSOCKETTOFLOW) (
+typedef BOOL(CALLBACK* LPFN_QOSADDSOCKETTOFLOW) (
     HANDLE QOSHandle,
     SOCKET Socket,
     PSOCKADDR DestAddr,
     QOS_TRAFFIC_TYPE TrafficType,
     DWORD Flags,
     PQOS_FLOWID FlowId
-);
+    );
 
-typedef BOOL (CALLBACK *LPFN_QOSREMOVESOCKETFROMFLOW) (
+typedef BOOL(CALLBACK* LPFN_QOSREMOVESOCKETFROMFLOW) (
     HANDLE QOSHandle,
     SOCKET Socket,
     QOS_FLOWID FlowId,
     DWORD Flags
-);
+    );
 
 #define PRINT_TIMESTAMPED_MSG(s, ...) { \
     SYSTEMTIME system_time; \
@@ -251,7 +254,7 @@ typedef BOOL (CALLBACK *LPFN_QOSREMOVESOCKETFROMFLOW) (
 #define SENDER_SLEEP_BETWEEN_RECONNECT 100 // 0.1s
 #define SENDER_CONNECTION_RETRIES 100 // at least 10s to connect total, but may be higher
 #define MAX_CONCURRENT_CONNECT_COUNT 10 // smaller = more RTTs until test starts
-                                        // larger = risk of connection retransmits/failures
+// larger = risk of connection retransmits/failures
 #define CPU_BURN_SCALE 1000
 #define MAX_NUM_CONNECTIONS 1000
 #define XMLNODE_ESTATS_MAXLENGTH 16384 // For EStats
@@ -347,9 +350,9 @@ long jitter_packet_period = 0;
 long node_affinity = -1;
 long udp_uso_size = 0;
 long num_processors = 0;
-LARGE_INTEGER machine_frequency = {0};
+LARGE_INTEGER machine_frequency = { 0 };
 ULONGLONG machine_frequency_network_order = 0;
-FLAGS flags = {0};
+FLAGS flags = { 0 };
 char* mappings[MAX_MAPPINGS];
 char sender_name[MAX_IP_STR_LEN];
 DWORD proc_speed = 0;
@@ -393,9 +396,11 @@ ScanHexFormat(
                 for (Long = 0, Width = 0;; Format++) {
                     if ((*Format >= '0') && (*Format <= '9')) {
                         Width = Width * 10 + *Format - '0';
-                    } else if (*Format == 'l') {
+                    }
+                    else if (*Format == 'l') {
                         Long++;
-                    } else if ((*Format == 'X') || (*Format == 'x')) {
+                    }
+                    else if ((*Format == 'X') || (*Format == 'x')) {
                         break;
                     }
                 }
@@ -406,18 +411,22 @@ ScanHexFormat(
                     Number *= 16;
                     if ((*Buffer >= '0') && (*Buffer <= '9')) {
                         Number += (*Buffer - '0');
-                    } else if ((*Buffer >= 'a') && (*Buffer <= 'f')) {
+                    }
+                    else if ((*Buffer >= 'a') && (*Buffer <= 'f')) {
                         Number += (*Buffer - 'a' + 10);
-                    } else if ((*Buffer >= 'A') && (*Buffer <= 'F')) {
+                    }
+                    else if ((*Buffer >= 'A') && (*Buffer <= 'F')) {
                         Number += (*Buffer - 'A' + 10);
-                    } else {
+                    }
+                    else {
                         return -1;
                     }
                 }
                 Pointer = va_arg(ArgList, PVOID);
                 if (Long) {
                     *(PULONG)Pointer = Number;
-                } else {
+                }
+                else {
                     *(PUSHORT)Pointer = (USHORT)Number;
                 }
                 FormatItems++;
@@ -440,31 +449,31 @@ _Success_(return == NO_ERROR)
 int
 ConvertStringToGuid(
     __in PCHAR GuidString,
-    __out GUID *Guid
-    )
+    __out GUID * Guid
+)
 {
     char GuidFormat[] = "{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}";
-    USHORT Data4[8] = {0};
+    USHORT Data4[8] = { 0 };
     int Count;
 
     if (ScanHexFormat(GuidString,
-                      (ULONG)strlen(GuidString),
-                      GuidFormat,
-                      &Guid->Data1,
-                      &Guid->Data2,
-                      &Guid->Data3,
-                      &Data4[0],
-                      &Data4[1],
-                      &Data4[2],
-                      &Data4[3],
-                      &Data4[4],
-                      &Data4[5],
-                      &Data4[6],
-                      &Data4[7]) == -1) {
+        (ULONG)strlen(GuidString),
+        GuidFormat,
+        &Guid->Data1,
+        &Guid->Data2,
+        &Guid->Data3,
+        &Data4[0],
+        &Data4[1],
+        &Data4[2],
+        &Data4[3],
+        &Data4[4],
+        &Data4[5],
+        &Data4[6],
+        &Data4[7]) == -1) {
         return ERROR_PARAMS;
     }
 
-    for (Count = 0; Count < sizeof(Data4)/sizeof(Data4[0]); Count++) {
+    for (Count = 0; Count < sizeof(Data4) / sizeof(Data4[0]); Count++) {
         Guid->Data4[Count] = (UCHAR)Data4[Count];
     }
 
@@ -479,26 +488,26 @@ FindMatchingRow(
     __in const PVOID tcp_table,
     __in const BOOL is_v6,
     __out PVOID row
-    )
+)
 {
     BOOL connection_found = FALSE;
     DWORD i = 0;
 
     if (is_v6) {
         PMIB_TCP6ROW tcp_row = NULL;
-        struct sockaddr_in6* local_port = (struct sockaddr_in6 *) local_name;
-        struct sockaddr_in6* remote_port = (struct sockaddr_in6 *) remote_name;
-        for (i = 0; i < ((PMIB_TCP6TABLE) tcp_table)->dwNumEntries; ++i) {
-            tcp_row = &((PMIB_TCP6TABLE) tcp_table)->table[i];
+        struct sockaddr_in6* local_port = (struct sockaddr_in6*)local_name;
+        struct sockaddr_in6* remote_port = (struct sockaddr_in6*)remote_name;
+        for (i = 0; i < ((PMIB_TCP6TABLE)tcp_table)->dwNumEntries; ++i) {
+            tcp_row = &((PMIB_TCP6TABLE)tcp_table)->table[i];
 
-            if ((memcmp((PVOID)&(tcp_row->LocalAddr),
-                        (PVOID)&(local_port->sin6_addr),
-                        sizeof(IN6_ADDR)) == 0) &&
+            if ((memcmp((PVOID) & (tcp_row->LocalAddr),
+                (PVOID) & (local_port->sin6_addr),
+                sizeof(IN6_ADDR)) == 0) &&
                 tcp_row->dwLocalPort == local_port->sin6_port &&
                 tcp_row->dwLocalScopeId == local_port->sin6_scope_id &&
-                (memcmp((PVOID)&(tcp_row->RemoteAddr),
-                        (PVOID)&(remote_port->sin6_addr),
-                        sizeof(IN6_ADDR)) == 0) &&
+                (memcmp((PVOID) & (tcp_row->RemoteAddr),
+                    (PVOID) & (remote_port->sin6_addr),
+                    sizeof(IN6_ADDR)) == 0) &&
                 tcp_row->dwRemotePort == remote_port->sin6_port &&
                 tcp_row->dwRemoteScopeId == remote_port->sin6_scope_id &&
                 tcp_row->State == MIB_TCP_STATE_ESTAB) {
@@ -507,12 +516,13 @@ FindMatchingRow(
                 break;
             }
         }
-    } else {
+    }
+    else {
         PMIB_TCPROW tcp_row = NULL;
-        struct sockaddr_in* local_port = (struct sockaddr_in *) local_name;
-        struct sockaddr_in* remote_port = (struct sockaddr_in *) remote_name;
-        for (i = 0; i < ((PMIB_TCPTABLE) tcp_table)->dwNumEntries; ++i) {
-            tcp_row = &((PMIB_TCPTABLE) tcp_table)->table[i];
+        struct sockaddr_in* local_port = (struct sockaddr_in*)local_name;
+        struct sockaddr_in* remote_port = (struct sockaddr_in*)remote_name;
+        for (i = 0; i < ((PMIB_TCPTABLE)tcp_table)->dwNumEntries; ++i) {
+            tcp_row = &((PMIB_TCPTABLE)tcp_table)->table[i];
 
             if (tcp_row->dwLocalAddr == local_port->sin_addr.S_un.S_addr &&
                 tcp_row->dwLocalPort == local_port->sin_port &&
@@ -531,22 +541,22 @@ FindMatchingRow(
 _Success_(return == NO_ERROR)
 int
 GetTcpRow(
-    __in const SOCKET *socket,
+    __in const SOCKET * socket,
     __in const BOOL is_v6,
     __out PVOID row
-    )
+)
 {
     int status = NO_ERROR;
     int name_len = sizeof(SOCKADDR_STORAGE);
-    SOCKADDR_STORAGE local_name = {0};
-    SOCKADDR_STORAGE remote_name = {0};
+    SOCKADDR_STORAGE local_name = { 0 };
+    SOCKADDR_STORAGE remote_name = { 0 };
     PVOID tcp_table = NULL;
     DWORD size = 0;
 
     ASSERT(socket != NULL);
     ASSERT(row != NULL);
 
-    status = getsockname(*socket, (struct sockaddr *) &local_name, &name_len);
+    status = getsockname(*socket, (struct sockaddr*)&local_name, &name_len);
     if (SOCKET_ERROR == status) {
         status = WSAGetLastError();
         goto exit;
@@ -559,7 +569,7 @@ GetTcpRow(
     }
 
     name_len = sizeof(SOCKADDR_STORAGE);
-    status = getpeername(*socket, (struct sockaddr *) &remote_name, &name_len);
+    status = getpeername(*socket, (struct sockaddr*)&remote_name, &name_len);
     if (SOCKET_ERROR == status) {
         status = WSAGetLastError();
         goto exit;
@@ -568,9 +578,10 @@ GetTcpRow(
 
     // Determine size of table
     if (is_v6) {
-        status = (ULONG) lpGetTcp6Table((PMIB_TCP6TABLE) tcp_table, &size, TRUE);
-    } else {
-        status = GetTcpTable((PMIB_TCPTABLE) tcp_table, &size, TRUE);
+        status = (ULONG)lpGetTcp6Table((PMIB_TCP6TABLE)tcp_table, &size, TRUE);
+    }
+    else {
+        status = GetTcpTable((PMIB_TCPTABLE)tcp_table, &size, TRUE);
     }
     if (ERROR_INSUFFICIENT_BUFFER != status) {
         goto exit;
@@ -584,9 +595,10 @@ GetTcpRow(
 
     // Get actual table
     if (is_v6) {
-        status = (ULONG) lpGetTcp6Table((PMIB_TCP6TABLE) tcp_table, &size, TRUE);
-    } else {
-        status = GetTcpTable((PMIB_TCPTABLE) tcp_table, &size, TRUE);
+        status = (ULONG)lpGetTcp6Table((PMIB_TCP6TABLE)tcp_table, &size, TRUE);
+    }
+    else {
+        status = GetTcpTable((PMIB_TCPTABLE)tcp_table, &size, TRUE);
     }
     if (NO_ERROR != status) {
         goto exit;
@@ -614,81 +626,82 @@ ToggleTcpEstats(
     __in const TCP_ESTATS_TYPE type,
     __in const BOOL enable,
     __in const BOOL is_v6
-    )
+)
 {
     BOOL ret_val = TRUE;
     TCP_BOOLEAN_OPTIONAL operation = enable ? TcpBoolOptEnabled : TcpBoolOptDisabled;
     ULONG status = NO_ERROR;
     ULONG size = 0;
     PUCHAR rw = NULL;
-    TCP_ESTATS_DATA_RW_v0 data_rw = {0};
-    TCP_ESTATS_SND_CONG_RW_v0 snd_rw = {0};
-    TCP_ESTATS_PATH_RW_v0 path_rw = {0};
-    TCP_ESTATS_SEND_BUFF_RW_v0 send_buff_rw = {0};
-    TCP_ESTATS_REC_RW_v0 rec_rw = {0};
-    TCP_ESTATS_OBS_REC_RW_v0 obs_rec_rw = {0};
-    TCP_ESTATS_BANDWIDTH_RW_v0 bandwidth_rw = {0};
-    TCP_ESTATS_FINE_RTT_RW_v0 fine_rtt_rw = {0};
+    TCP_ESTATS_DATA_RW_v0 data_rw = { 0 };
+    TCP_ESTATS_SND_CONG_RW_v0 snd_rw = { 0 };
+    TCP_ESTATS_PATH_RW_v0 path_rw = { 0 };
+    TCP_ESTATS_SEND_BUFF_RW_v0 send_buff_rw = { 0 };
+    TCP_ESTATS_REC_RW_v0 rec_rw = { 0 };
+    TCP_ESTATS_OBS_REC_RW_v0 obs_rec_rw = { 0 };
+    TCP_ESTATS_BANDWIDTH_RW_v0 bandwidth_rw = { 0 };
+    TCP_ESTATS_FINE_RTT_RW_v0 fine_rtt_rw = { 0 };
 
-    switch(type) {
-        case TcpConnectionEstatsData:
-            data_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &data_rw;
-            size = sizeof(TCP_ESTATS_DATA_RW_v0);
-            break;
+    switch (type) {
+    case TcpConnectionEstatsData:
+        data_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&data_rw;
+        size = sizeof(TCP_ESTATS_DATA_RW_v0);
+        break;
 
-        case TcpConnectionEstatsSndCong:
-            snd_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &snd_rw;
-            size = sizeof(TCP_ESTATS_SND_CONG_RW_v0);
-            break;
+    case TcpConnectionEstatsSndCong:
+        snd_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&snd_rw;
+        size = sizeof(TCP_ESTATS_SND_CONG_RW_v0);
+        break;
 
-        case TcpConnectionEstatsPath:
-            path_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &path_rw;
-            size = sizeof(TCP_ESTATS_PATH_RW_v0);
-            break;
+    case TcpConnectionEstatsPath:
+        path_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&path_rw;
+        size = sizeof(TCP_ESTATS_PATH_RW_v0);
+        break;
 
-        case TcpConnectionEstatsSendBuff:
-            send_buff_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &send_buff_rw;
-            size = sizeof(TCP_ESTATS_SEND_BUFF_RW_v0);
-            break;
+    case TcpConnectionEstatsSendBuff:
+        send_buff_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&send_buff_rw;
+        size = sizeof(TCP_ESTATS_SEND_BUFF_RW_v0);
+        break;
 
-        case TcpConnectionEstatsRec:
-            rec_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &rec_rw;
-            size = sizeof(TCP_ESTATS_REC_RW_v0);
-            break;
+    case TcpConnectionEstatsRec:
+        rec_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&rec_rw;
+        size = sizeof(TCP_ESTATS_REC_RW_v0);
+        break;
 
-        case TcpConnectionEstatsObsRec:
-            obs_rec_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &obs_rec_rw;
-            size = sizeof(TCP_ESTATS_OBS_REC_RW_v0);
-            break;
+    case TcpConnectionEstatsObsRec:
+        obs_rec_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&obs_rec_rw;
+        size = sizeof(TCP_ESTATS_OBS_REC_RW_v0);
+        break;
 
-        case TcpConnectionEstatsBandwidth:
-            bandwidth_rw.EnableCollectionInbound = operation;
-            bandwidth_rw.EnableCollectionOutbound = operation;
-            rw = (PUCHAR) &bandwidth_rw;
-            size = sizeof(TCP_ESTATS_BANDWIDTH_RW_v0);
-            break;
+    case TcpConnectionEstatsBandwidth:
+        bandwidth_rw.EnableCollectionInbound = operation;
+        bandwidth_rw.EnableCollectionOutbound = operation;
+        rw = (PUCHAR)&bandwidth_rw;
+        size = sizeof(TCP_ESTATS_BANDWIDTH_RW_v0);
+        break;
 
-        case TcpConnectionEstatsFineRtt:
-            fine_rtt_rw.EnableCollection = (BOOLEAN) enable;
-            rw = (PUCHAR) &fine_rtt_rw;
-            size = sizeof(TCP_ESTATS_FINE_RTT_RW_v0);
-            break;
+    case TcpConnectionEstatsFineRtt:
+        fine_rtt_rw.EnableCollection = (BOOLEAN)enable;
+        rw = (PUCHAR)&fine_rtt_rw;
+        size = sizeof(TCP_ESTATS_FINE_RTT_RW_v0);
+        break;
 
-        default:
-            ret_val = FALSE;
-            goto exit;
+    default:
+        ret_val = FALSE;
+        goto exit;
     }
 
     if (is_v6) {
-        status = (ULONG) lpSetPerTcp6ConnectionEStats((PMIB_TCP6ROW) row, type, rw, 0, size, 0);
-    } else {
-        status = (ULONG) lpSetPerTcpConnectionEStats((PMIB_TCPROW) row, type, rw, 0, size, 0);
+        status = (ULONG)lpSetPerTcp6ConnectionEStats((PMIB_TCP6ROW)row, type, rw, 0, size, 0);
+    }
+    else {
+        status = (ULONG)lpSetPerTcpConnectionEStats((PMIB_TCPROW)row, type, rw, 0, size, 0);
     }
 
     if (status != NO_ERROR) {
@@ -702,9 +715,9 @@ exit:
 _Success_(return == TRUE)
 BOOL
 EnableEstats(
-    __in const SOCKET *socket,
+    __in const SOCKET * socket,
     __out PVOID tcp_row
-    )
+)
 {
     if (NULL == tcp_row) {
         return FALSE;
@@ -719,7 +732,8 @@ EnableEstats(
         ret &= ToggleTcpEstats(tcp_row, TcpConnectionEstatsObsRec, TRUE, flags.use_ipv6_flag);
         ret &= ToggleTcpEstats(tcp_row, TcpConnectionEstatsBandwidth, TRUE, flags.use_ipv6_flag);
         ret &= ToggleTcpEstats(tcp_row, TcpConnectionEstatsFineRtt, TRUE, flags.use_ipv6_flag);
-    } else {
+    }
+    else {
         ret = FALSE;
         MSG("Could not get TcpRow");
     }
@@ -731,7 +745,7 @@ GetRodRosSize(
     __in const TCP_ESTATS_TYPE estats_type,
     __out PULONG ros_size,
     __out PULONG rod_size
-    )
+)
 {
     BOOL ret_val = TRUE;
 
@@ -741,39 +755,39 @@ GetRodRosSize(
     *rod_size = 0;
     *ros_size = 0;
 
-    switch(estats_type)
+    switch (estats_type)
     {
-        case TcpConnectionEstatsSynOpts:
-            *ros_size = sizeof(TCP_ESTATS_SYN_OPTS_ROS_v0);
-            break;
-        case TcpConnectionEstatsData:
-            *rod_size = sizeof(TCP_ESTATS_DATA_ROD_v0);
-            break;
-        case TcpConnectionEstatsSndCong:
-            *rod_size = sizeof(TCP_ESTATS_SND_CONG_ROD_v0);
-            *ros_size = sizeof(TCP_ESTATS_SND_CONG_ROS_v0);
-            break;
-        case TcpConnectionEstatsPath:
-            *rod_size = sizeof(TCP_ESTATS_PATH_ROD_v0);
-            break;
-        case TcpConnectionEstatsSendBuff:
-            *rod_size = sizeof(TCP_ESTATS_SEND_BUFF_ROD_v0);
-            break;
-        case TcpConnectionEstatsRec:
-            *rod_size = sizeof(TCP_ESTATS_REC_ROD_v0);
-            break;
-        case TcpConnectionEstatsObsRec:
-            *rod_size = sizeof(TCP_ESTATS_OBS_REC_ROD_v0);
-            break;
-        case TcpConnectionEstatsBandwidth:
-            *rod_size = sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0);
-            break;
-        case TcpConnectionEstatsFineRtt:
-            *rod_size = sizeof(TCP_ESTATS_FINE_RTT_ROD_v0);
-            break;
-        default:
-            ret_val = TRUE;
-            break;
+    case TcpConnectionEstatsSynOpts:
+        *ros_size = sizeof(TCP_ESTATS_SYN_OPTS_ROS_v0);
+        break;
+    case TcpConnectionEstatsData:
+        *rod_size = sizeof(TCP_ESTATS_DATA_ROD_v0);
+        break;
+    case TcpConnectionEstatsSndCong:
+        *rod_size = sizeof(TCP_ESTATS_SND_CONG_ROD_v0);
+        *ros_size = sizeof(TCP_ESTATS_SND_CONG_ROS_v0);
+        break;
+    case TcpConnectionEstatsPath:
+        *rod_size = sizeof(TCP_ESTATS_PATH_ROD_v0);
+        break;
+    case TcpConnectionEstatsSendBuff:
+        *rod_size = sizeof(TCP_ESTATS_SEND_BUFF_ROD_v0);
+        break;
+    case TcpConnectionEstatsRec:
+        *rod_size = sizeof(TCP_ESTATS_REC_ROD_v0);
+        break;
+    case TcpConnectionEstatsObsRec:
+        *rod_size = sizeof(TCP_ESTATS_OBS_REC_ROD_v0);
+        break;
+    case TcpConnectionEstatsBandwidth:
+        *rod_size = sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0);
+        break;
+    case TcpConnectionEstatsFineRtt:
+        *rod_size = sizeof(TCP_ESTATS_FINE_RTT_ROD_v0);
+        break;
+    default:
+        ret_val = TRUE;
+        break;
     }
 
     return ret_val;
@@ -801,9 +815,10 @@ ExtractPerTcpEStats(
     }
 
     if (is_v6) {
-        status = (ULONG) lpGetPerTcp6ConnectionEStats((PMIB_TCP6ROW)row, estats_type, NULL, 0, 0, ros, 0, ros_size, rod, 0, rod_size);
-    } else {
-        status = (ULONG) lpGetPerTcpConnectionEStats((PMIB_TCPROW)row, estats_type, NULL, 0, 0, ros, 0, ros_size, rod, 0, rod_size);
+        status = (ULONG)lpGetPerTcp6ConnectionEStats((PMIB_TCP6ROW)row, estats_type, NULL, 0, 0, ros, 0, ros_size, rod, 0, rod_size);
+    }
+    else {
+        status = (ULONG)lpGetPerTcpConnectionEStats((PMIB_TCPROW)row, estats_type, NULL, 0, 0, ros, 0, ros_size, rod, 0, rod_size);
     }
 
     if (NO_ERROR != status) {
@@ -819,7 +834,7 @@ BOOL
 GetEstats(
     __in const PVOID tcp_row,
     __out PESTATS_DATA estats_data
-    )
+)
 {
     if (!flags.get_estats || NULL == tcp_row) {
         return FALSE;
@@ -852,7 +867,7 @@ GetEStatsXml(
     _In_ const PESTATS_DATA data,
     _In_ const PCHAR tag,
     _Out_writes_(XMLNODE_ESTATS_MAXLENGTH) PCHAR xml
-    )
+)
 {
     size_t chars_occupied = 0;
 
@@ -860,136 +875,136 @@ GetEStatsXml(
     ASSERT(NULL != tag);
     ASSERT(NULL != xml);
 
-    _SNPRINTF_END (xml, "\t\t<estats type=\"%s\">\n", &chars_occupied, tag);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SYN_OPTS_ROS_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "ActiveOpen", (data->tcp_estats_syn_opts_ros.ActiveOpen ? "True" : "False" ));
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MssRcvd", data->tcp_estats_syn_opts_ros.MssRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MssSent", data->tcp_estats_syn_opts_ros.MssSent);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_DATA_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataBytesOut", data->tcp_estats_data_rod.DataBytesOut);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataSegsOut", data->tcp_estats_data_rod.DataSegsOut);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataBytesIn", data->tcp_estats_data_rod.DataBytesIn);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataSegsIn", data->tcp_estats_data_rod.DataSegsIn);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "SegsOut", data->tcp_estats_data_rod.SegsOut);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "SegsIn", data->tcp_estats_data_rod.SegsIn);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SoftErrors", data->tcp_estats_data_rod.SoftErrors);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SoftErrorReason", data->tcp_estats_data_rod.SoftErrorReason);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndUna", data->tcp_estats_data_rod.SndUna);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndNxt", data->tcp_estats_data_rod.SndNxt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndMax", data->tcp_estats_data_rod.SndMax);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "ThruBytesAcked", data->tcp_estats_data_rod.ThruBytesAcked);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RcvNxt", data->tcp_estats_data_rod.RcvNxt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "ThruBytesReceived", data->tcp_estats_data_rod.ThruBytesReceived);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SND_CONG_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransRwin", data->tcp_estats_snd_cong_rod.SndLimTransRwin);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeRwin", data->tcp_estats_snd_cong_rod.SndLimTimeRwin);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied,"SndLimBytesRwin", data->tcp_estats_snd_cong_rod.SndLimBytesRwin);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransCwnd", data->tcp_estats_snd_cong_rod.SndLimTransCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeCwnd", data->tcp_estats_snd_cong_rod.SndLimTimeCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "SndLimBytesCwnd", data->tcp_estats_snd_cong_rod.SndLimBytesCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransSnd", data->tcp_estats_snd_cong_rod.SndLimTransSnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeSnd", data->tcp_estats_snd_cong_rod.SndLimTimeSnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "SndLimBytesSnd", data->tcp_estats_snd_cong_rod.SndLimBytesSnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SlowStart", data->tcp_estats_snd_cong_rod.SlowStart);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CongAvoid", data->tcp_estats_snd_cong_rod.CongAvoid);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "OtherReductions", data->tcp_estats_snd_cong_rod.OtherReductions);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurCwnd", data->tcp_estats_snd_cong_rod.CurCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxSsCwnd", data->tcp_estats_snd_cong_rod.MaxSsCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxCaCwnd", data->tcp_estats_snd_cong_rod.MaxCaCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurSsthresh", data->tcp_estats_snd_cong_rod.CurSsthresh);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxSsthresh", data->tcp_estats_snd_cong_rod.MaxSsthresh);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinSsthresh", data->tcp_estats_snd_cong_rod.MinSsthresh);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SND_CONG_ROS_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "LimCwnd", data->tcp_estats_snd_cong_ros.LimCwnd);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_PATH_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "FastRetran", data->tcp_estats_path_rod.FastRetran);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "Timeouts", data->tcp_estats_path_rod.Timeouts);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SubsequentTimeouts", data->tcp_estats_path_rod.SubsequentTimeouts);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurTimeoutCount", data->tcp_estats_path_rod.CurTimeoutCount);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "AbruptTimeouts", data->tcp_estats_path_rod.AbruptTimeouts);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PktsRetrans", data->tcp_estats_path_rod.PktsRetrans);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "BytesRetrans", data->tcp_estats_path_rod.BytesRetrans);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAcksIn", data->tcp_estats_path_rod.DupAcksIn);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SacksRcvd", data->tcp_estats_path_rod.SacksRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SackBlocksRcvd", data->tcp_estats_path_rod.SackBlocksRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CongSignals", data->tcp_estats_path_rod.CongSignals);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PreCongSumCwnd", data->tcp_estats_path_rod.PreCongSumCwnd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PreCongSumRtt", data->tcp_estats_path_rod.PreCongSumRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PostCongSumRtt", data->tcp_estats_path_rod.PostCongSumRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PostCongCountRtt", data->tcp_estats_path_rod.PostCongCountRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnSignals", data->tcp_estats_path_rod.EcnSignals);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EceRcvd", data->tcp_estats_path_rod.EceRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SendStall", data->tcp_estats_path_rod.SendStall);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "QuenchRcvd", data->tcp_estats_path_rod.QuenchRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RetranThresh", data->tcp_estats_path_rod.RetranThresh);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndDupAckEpisodes", data->tcp_estats_path_rod.SndDupAckEpisodes);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumBytesReordered", data->tcp_estats_path_rod.SumBytesReordered);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "NonRecovDa", data->tcp_estats_path_rod.NonRecovDa);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "NonRecovDaEpisodes", data->tcp_estats_path_rod.NonRecovDaEpisodes);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "AckAfterFr", data->tcp_estats_path_rod.AckAfterFr);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DsackDups", data->tcp_estats_path_rod.DsackDups);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SampleRtt", data->tcp_estats_path_rod.SampleRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SmoothedRtt", data->tcp_estats_path_rod.SmoothedRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RttVar", data->tcp_estats_path_rod.RttVar);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRtt", data->tcp_estats_path_rod.MaxRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRtt", data->tcp_estats_path_rod.MinRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumRtt", data->tcp_estats_path_rod.SumRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CountRtt", data->tcp_estats_path_rod.CountRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRto", data->tcp_estats_path_rod.CurRto);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRto", data->tcp_estats_path_rod.MaxRto);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRto", data->tcp_estats_path_rod.MinRto);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurMss", data->tcp_estats_path_rod.CurMss);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxMss", data->tcp_estats_path_rod.MaxMss);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinMss", data->tcp_estats_path_rod.MinMss);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SpuriousRtoDetections", data->tcp_estats_path_rod.SpuriousRtoDetections);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SEND_BUFF_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurRetxQueue", data->tcp_estats_send_buff_rod.CurRetxQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxRetxQueue", data->tcp_estats_send_buff_rod.MaxRetxQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurAppWQueue", data->tcp_estats_send_buff_rod.CurAppWQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxAppWQueue", data->tcp_estats_send_buff_rod.MaxRetxQueue);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_REC_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRwinSent", data->tcp_estats_rec_rod.CurRwinSent);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRwinSent", data->tcp_estats_rec_rod.MaxRwinSent);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRwinSent", data->tcp_estats_rec_rod.MinRwinSent);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "LimRwin", data->tcp_estats_rec_rod.LimRwin);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAckEpisodes", data->tcp_estats_rec_rod.DupAckEpisodes);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAcksOut", data->tcp_estats_rec_rod.DupAcksOut);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CeRcvd", data->tcp_estats_rec_rod.CeRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnSent", data->tcp_estats_rec_rod.EcnSent);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnNoncesRcvd", data->tcp_estats_rec_rod.EcnNoncesRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurReasmQueue", data->tcp_estats_rec_rod.CurReasmQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxReasmQueue", data->tcp_estats_rec_rod.MaxReasmQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurAppRQueue", data->tcp_estats_rec_rod.CurAppRQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxAppRQueue", data->tcp_estats_rec_rod.MaxAppRQueue);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"0x%.2x\" />\n", &chars_occupied, "WinScaleSent", data->tcp_estats_rec_rod.WinScaleSent);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_OBS_REC_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRwinRcvd", data->tcp_estats_obs_rec_rod.CurRwinRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRwinRcvd", data->tcp_estats_obs_rec_rod.MaxRwinRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRwinRcvd", data->tcp_estats_obs_rec_rod.MinRwinRcvd);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "WinScaleRcvd", data->tcp_estats_obs_rec_rod.WinScaleRcvd);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_BANDWIDTH_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "OutboundBandwidth", data->tcp_estats_bandwidth_rod.OutboundBandwidth);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "InboundBandwidth", data->tcp_estats_bandwidth_rod.InboundBandwidth);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "OutboundInstability", data->tcp_estats_bandwidth_rod.OutboundInstability);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "InboundInstability", data->tcp_estats_bandwidth_rod.InboundInstability);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "OutboundBandwidthPeaked", (data->tcp_estats_bandwidth_rod.OutboundBandwidthPeaked ? "True" : "False"));
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "InboundBandwidthPeaked", (data->tcp_estats_bandwidth_rod.InboundBandwidthPeaked ? "True" : "False"));
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_FINE_RTT_ROD_v0");
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RttVar", data->tcp_estats_fine_rtt_rod.RttVar);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRtt", data->tcp_estats_fine_rtt_rod.MaxRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRtt", data->tcp_estats_fine_rtt_rod.MinRtt);
-    _SNPRINTF_END (xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumRtt", data->tcp_estats_fine_rtt_rod.SumRtt);
-    _SNPRINTF_END (xml, "\t\t\t</structure>\n", &chars_occupied);
-    _SNPRINTF_END (xml, "\t\t</estats>", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t<estats type=\"%s\">\n", &chars_occupied, tag);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SYN_OPTS_ROS_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "ActiveOpen", (data->tcp_estats_syn_opts_ros.ActiveOpen ? "True" : "False"));
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MssRcvd", data->tcp_estats_syn_opts_ros.MssRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MssSent", data->tcp_estats_syn_opts_ros.MssSent);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_DATA_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataBytesOut", data->tcp_estats_data_rod.DataBytesOut);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataSegsOut", data->tcp_estats_data_rod.DataSegsOut);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataBytesIn", data->tcp_estats_data_rod.DataBytesIn);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "DataSegsIn", data->tcp_estats_data_rod.DataSegsIn);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "SegsOut", data->tcp_estats_data_rod.SegsOut);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "SegsIn", data->tcp_estats_data_rod.SegsIn);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SoftErrors", data->tcp_estats_data_rod.SoftErrors);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SoftErrorReason", data->tcp_estats_data_rod.SoftErrorReason);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndUna", data->tcp_estats_data_rod.SndUna);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndNxt", data->tcp_estats_data_rod.SndNxt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndMax", data->tcp_estats_data_rod.SndMax);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "ThruBytesAcked", data->tcp_estats_data_rod.ThruBytesAcked);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RcvNxt", data->tcp_estats_data_rod.RcvNxt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "ThruBytesReceived", data->tcp_estats_data_rod.ThruBytesReceived);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SND_CONG_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransRwin", data->tcp_estats_snd_cong_rod.SndLimTransRwin);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeRwin", data->tcp_estats_snd_cong_rod.SndLimTimeRwin);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "SndLimBytesRwin", data->tcp_estats_snd_cong_rod.SndLimBytesRwin);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransCwnd", data->tcp_estats_snd_cong_rod.SndLimTransCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeCwnd", data->tcp_estats_snd_cong_rod.SndLimTimeCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "SndLimBytesCwnd", data->tcp_estats_snd_cong_rod.SndLimBytesCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTransSnd", data->tcp_estats_snd_cong_rod.SndLimTransSnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndLimTimeSnd", data->tcp_estats_snd_cong_rod.SndLimTimeSnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "SndLimBytesSnd", data->tcp_estats_snd_cong_rod.SndLimBytesSnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SlowStart", data->tcp_estats_snd_cong_rod.SlowStart);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CongAvoid", data->tcp_estats_snd_cong_rod.CongAvoid);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "OtherReductions", data->tcp_estats_snd_cong_rod.OtherReductions);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurCwnd", data->tcp_estats_snd_cong_rod.CurCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxSsCwnd", data->tcp_estats_snd_cong_rod.MaxSsCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxCaCwnd", data->tcp_estats_snd_cong_rod.MaxCaCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurSsthresh", data->tcp_estats_snd_cong_rod.CurSsthresh);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxSsthresh", data->tcp_estats_snd_cong_rod.MaxSsthresh);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinSsthresh", data->tcp_estats_snd_cong_rod.MinSsthresh);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SND_CONG_ROS_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "LimCwnd", data->tcp_estats_snd_cong_ros.LimCwnd);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_PATH_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "FastRetran", data->tcp_estats_path_rod.FastRetran);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "Timeouts", data->tcp_estats_path_rod.Timeouts);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SubsequentTimeouts", data->tcp_estats_path_rod.SubsequentTimeouts);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurTimeoutCount", data->tcp_estats_path_rod.CurTimeoutCount);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "AbruptTimeouts", data->tcp_estats_path_rod.AbruptTimeouts);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PktsRetrans", data->tcp_estats_path_rod.PktsRetrans);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "BytesRetrans", data->tcp_estats_path_rod.BytesRetrans);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAcksIn", data->tcp_estats_path_rod.DupAcksIn);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SacksRcvd", data->tcp_estats_path_rod.SacksRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SackBlocksRcvd", data->tcp_estats_path_rod.SackBlocksRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CongSignals", data->tcp_estats_path_rod.CongSignals);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PreCongSumCwnd", data->tcp_estats_path_rod.PreCongSumCwnd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PreCongSumRtt", data->tcp_estats_path_rod.PreCongSumRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PostCongSumRtt", data->tcp_estats_path_rod.PostCongSumRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "PostCongCountRtt", data->tcp_estats_path_rod.PostCongCountRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnSignals", data->tcp_estats_path_rod.EcnSignals);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EceRcvd", data->tcp_estats_path_rod.EceRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SendStall", data->tcp_estats_path_rod.SendStall);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "QuenchRcvd", data->tcp_estats_path_rod.QuenchRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RetranThresh", data->tcp_estats_path_rod.RetranThresh);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SndDupAckEpisodes", data->tcp_estats_path_rod.SndDupAckEpisodes);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumBytesReordered", data->tcp_estats_path_rod.SumBytesReordered);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "NonRecovDa", data->tcp_estats_path_rod.NonRecovDa);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "NonRecovDaEpisodes", data->tcp_estats_path_rod.NonRecovDaEpisodes);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "AckAfterFr", data->tcp_estats_path_rod.AckAfterFr);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DsackDups", data->tcp_estats_path_rod.DsackDups);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SampleRtt", data->tcp_estats_path_rod.SampleRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SmoothedRtt", data->tcp_estats_path_rod.SmoothedRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RttVar", data->tcp_estats_path_rod.RttVar);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRtt", data->tcp_estats_path_rod.MaxRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRtt", data->tcp_estats_path_rod.MinRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumRtt", data->tcp_estats_path_rod.SumRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CountRtt", data->tcp_estats_path_rod.CountRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRto", data->tcp_estats_path_rod.CurRto);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRto", data->tcp_estats_path_rod.MaxRto);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRto", data->tcp_estats_path_rod.MinRto);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurMss", data->tcp_estats_path_rod.CurMss);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxMss", data->tcp_estats_path_rod.MaxMss);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinMss", data->tcp_estats_path_rod.MinMss);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SpuriousRtoDetections", data->tcp_estats_path_rod.SpuriousRtoDetections);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_SEND_BUFF_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurRetxQueue", data->tcp_estats_send_buff_rod.CurRetxQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxRetxQueue", data->tcp_estats_send_buff_rod.MaxRetxQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurAppWQueue", data->tcp_estats_send_buff_rod.CurAppWQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxAppWQueue", data->tcp_estats_send_buff_rod.MaxRetxQueue);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_REC_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRwinSent", data->tcp_estats_rec_rod.CurRwinSent);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRwinSent", data->tcp_estats_rec_rod.MaxRwinSent);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRwinSent", data->tcp_estats_rec_rod.MinRwinSent);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "LimRwin", data->tcp_estats_rec_rod.LimRwin);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAckEpisodes", data->tcp_estats_rec_rod.DupAckEpisodes);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "DupAcksOut", data->tcp_estats_rec_rod.DupAcksOut);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CeRcvd", data->tcp_estats_rec_rod.CeRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnSent", data->tcp_estats_rec_rod.EcnSent);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "EcnNoncesRcvd", data->tcp_estats_rec_rod.EcnNoncesRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurReasmQueue", data->tcp_estats_rec_rod.CurReasmQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxReasmQueue", data->tcp_estats_rec_rod.MaxReasmQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "CurAppRQueue", data->tcp_estats_rec_rod.CurAppRQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%Iu\" />\n", &chars_occupied, "MaxAppRQueue", data->tcp_estats_rec_rod.MaxAppRQueue);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"0x%.2x\" />\n", &chars_occupied, "WinScaleSent", data->tcp_estats_rec_rod.WinScaleSent);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_OBS_REC_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "CurRwinRcvd", data->tcp_estats_obs_rec_rod.CurRwinRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRwinRcvd", data->tcp_estats_obs_rec_rod.MaxRwinRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRwinRcvd", data->tcp_estats_obs_rec_rod.MinRwinRcvd);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "WinScaleRcvd", data->tcp_estats_obs_rec_rod.WinScaleRcvd);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_BANDWIDTH_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "OutboundBandwidth", data->tcp_estats_bandwidth_rod.OutboundBandwidth);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "InboundBandwidth", data->tcp_estats_bandwidth_rod.InboundBandwidth);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "OutboundInstability", data->tcp_estats_bandwidth_rod.OutboundInstability);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%llu\" />\n", &chars_occupied, "InboundInstability", data->tcp_estats_bandwidth_rod.InboundInstability);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "OutboundBandwidthPeaked", (data->tcp_estats_bandwidth_rod.OutboundBandwidthPeaked ? "True" : "False"));
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%s\" />\n", &chars_occupied, "InboundBandwidthPeaked", (data->tcp_estats_bandwidth_rod.InboundBandwidthPeaked ? "True" : "False"));
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t\t<structure name=\"%s\">\n", &chars_occupied, "TCP_ESTATS_FINE_RTT_ROD_v0");
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "RttVar", data->tcp_estats_fine_rtt_rod.RttVar);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MaxRtt", data->tcp_estats_fine_rtt_rod.MaxRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "MinRtt", data->tcp_estats_fine_rtt_rod.MinRtt);
+    _SNPRINTF_END(xml, "\t\t\t\t<property name=\"%s\" value=\"%lu\" />\n", &chars_occupied, "SumRtt", data->tcp_estats_fine_rtt_rod.SumRtt);
+    _SNPRINTF_END(xml, "\t\t\t</structure>\n", &chars_occupied);
+    _SNPRINTF_END(xml, "\t\t</estats>", &chars_occupied);
 }
 
 /*
@@ -999,7 +1014,7 @@ is used in calculating the Cycles/Byte cost during the experiment.
 DWORD
 GetProcessorSpeed(
     void
-    )
+)
 {
     HKEY hProcKey = NULL;
     LONG Registry_Code;
@@ -1018,7 +1033,7 @@ GetProcessorSpeed(
         MSG("Error Code: %d", Registry_Code);
     }
 
-    RegCloseKey (hProcKey);
+    RegCloseKey(hProcKey);
     return ret;
 }
 
@@ -1029,7 +1044,7 @@ The short intervals used in sampling require this level of accuracy.
 ULONG64
 GetCountTimeStamp(
     void
-    )
+)
 {
     BOOL Success;
     LARGE_INTEGER Count;
@@ -1045,17 +1060,17 @@ double
 GetCountDeltaInMicroseconds(
     ULONG64 StartCount,
     ULONG64 EndCount
-    )
+)
 {
     // The time delta large enough to overflow 64 bits here should not be encountered.
-    return (double) ((MICROSEC_TO_SEC * (EndCount - StartCount)) / (double) machine_frequency.QuadPart);
+    return (double)((MICROSEC_TO_SEC * (EndCount - StartCount)) / (double)machine_frequency.QuadPart);
 }
 
 void
 PrintError(
     __nullterminated __in PCHAR function,
     __nullterminated __in PCHAR description
-    )
+)
 {
     LPVOID lpMsgBuf = NULL;
     LPVOID lpDisplayBuf = NULL;
@@ -1070,7 +1085,7 @@ PrintError(
         NULL,
         last_error,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &lpMsgBuf,
+        (LPTSTR)&lpMsgBuf,
         0,
         NULL);
 
@@ -1090,7 +1105,7 @@ PrintError(
         }
         total_length += string_length;
 
-        lpDisplayBuf = (LPVOID) LocalAlloc(LMEM_ZEROINIT, (total_length + 40) * sizeof(TCHAR));
+        lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, (total_length + 40) * sizeof(TCHAR));
 
         if (lpDisplayBuf) {
             if (0 != last_error) {
@@ -1098,7 +1113,8 @@ PrintError(
                     LocalSize(lpDisplayBuf) / sizeof(TCHAR),
                     TEXT("ERROR: %s failed: %s, GetLastError: %d - %s"),
                     function, description, last_error, (LPTSTR)lpMsgBuf);
-            } else {
+            }
+            else {
                 StringCchPrintf((LPTSTR)lpDisplayBuf,
                     LocalSize(lpDisplayBuf) / sizeof(TCHAR),
                     TEXT("ERROR: %s failed: %s"),
@@ -1118,7 +1134,7 @@ PrintThreadError(
     __in int thread,
     __nullterminated __in PCHAR function,
     __nullterminated __in PCHAR description
-    )
+)
 {
     char buf[MAX_ERROR_BUFFER_SIZE];
     StringCchPrintf(buf, ARRAYSIZE(buf), TEXT("%s in thread: %d"), function, thread);
@@ -1129,52 +1145,52 @@ void
 PrintLocalError(
     __nullterminated __in PCHAR function,
     __in int local_error
-    )
+)
 {
     char buf[MAX_ERROR_BUFFER_SIZE];
 
     switch (local_error) {
-        case ERROR_MEMORY_ALLOC: PrintError(function, "error with memory allocation"); break;
-        case ERROR_CREATE_EVENT: PrintError(function, "error creating event"); break;
-        case ERROR_WAIT: PrintError(function, "error in wait"); break;
-        case ERROR_SET_EVENT: PrintError(function, "error setting event"); break;
-        case ERROR_SYNCH: PrintError(function, "error in synch"); break;
-        case ERROR_SEND_RECV: PrintError(function, "error in send/recv"); break;
-        case ERROR_DATA_INVALID: PrintError(function, "error data was invalid"); break;
-        case ERROR_INIT_DLLS: PrintError(function, "error initializing DLLs"); break;
-        case ERROR_PARAMS: PrintError(function, "error in parameters"); break;
-        case ERROR_GET_PROC_SPEED: PrintError(function, "error getting processors speed"); break;
-        case ERROR_GET_CPU_STATISTICS: PrintError(function, "error getting cpu statistics"); break;
-        case ERROR_GET_TCPUDP_STATISTICS: PrintError(function, "error getting tcp/udp statistics"); break;
-        case ERROR_OUTSTANDING_IOS_PENDING: PrintError(function, "error outstanding IOs still pending"); break;
-        case ERROR_SOCKET: PrintError(function, "error creating socket"); break;
-        case ERROR_SETSOCKOPT: PrintError(function, "error setting socket option"); break;
-        case ERROR_MEMCPY: PrintError(function, "error copying memmory"); break;
-        case ERROR_GETADDRINFO: PrintError(function, "error in getaddrinfo"); break;
-        case ERROR_WSAADDRTOSTRING: PrintError(function, "error in WSAAddrToString"); break;
-        case ERROR_SETTING_TRANSMIT_PACKETS: PrintError(function, "error while setting TransmitPackets function pointer"); break;
-        case ERROR_CONNECT_BIND: PrintError(function, "error in connect/bind function"); break;
-        case ERROR_LISTEN: PrintError(function, "error in listen function"); break;
-        case ERROR_ACCEPT: PrintError(function, "error in accept function"); break;
-        case ERROR_SETUP_NET: PrintError(function, "error in SetupNet function"); break;
-        case ERROR_SEND_DATA_PORTS_TO_SENDERS: PrintError(function, "error sending data ports to senders"); break;
-        case ERROR_SEND_RECEIVE_DATA_PORT: PrintError(function, "error sending or receiving data port"); break;
-        case ERROR_CLOSESOCKET: PrintError(function, "error in closesocket function"); break;
-        case ERROR_CREATE_IO_COML_PORT: PrintError(function, "error in CreateIoCompletionPort function"); break;
-        case ERROR_CREATE_THREAD: PrintError(function, "error in CreateThread function"); break;
-        case ERROR_WORKER_FAILED: PrintError(function, "one or more worker threads failed"); break;
-        case ERROR_ALLOCATING_ASYNCH_BUFFERS: PrintError(function, "error in AllocateAsynchBuffers function"); break;
-        case ERROR_WAIT_ABORTED_BY_CONTROLLER: PrintError(function, "controller aborted connection, this is normal behavior and SHOULD NOT be reported as error (!?)"); break;
-        case ERROR_INITIALIZING_QOS: PrintError(function, "error in QOSCreateHandle"); break;
-        case ERROR_ADDING_SOCKET_TO_QOS: PrintError(function, "error in QOSAddSocketToFlow"); break;
-        case ERROR_CLOSING_QOS: PrintError(function, "error in QOSCloseHandle"); break;
-        case ERROR_CREATING_TIMER_QUEUE_TIMER: PrintError(function, "error in CreateTimerQueueTimer"); break;
-        case ERROR_CLOSING_TIMER_QUEUE_TIMER: PrintError(function, "error in DeleteTimerQueueTimer"); break;
-        case ERROR_FORMING_PAYLOAD: PrintError(function, "error in AddPayloadToBuffer"); break;
-        default:
-            StringCchPrintf(buf, ARRAYSIZE(buf), TEXT("unknown error: %d"), local_error);
-            PrintError(function, buf);
-            break;
+    case ERROR_MEMORY_ALLOC: PrintError(function, "error with memory allocation"); break;
+    case ERROR_CREATE_EVENT: PrintError(function, "error creating event"); break;
+    case ERROR_WAIT: PrintError(function, "error in wait"); break;
+    case ERROR_SET_EVENT: PrintError(function, "error setting event"); break;
+    case ERROR_SYNCH: PrintError(function, "error in synch"); break;
+    case ERROR_SEND_RECV: PrintError(function, "error in send/recv"); break;
+    case ERROR_DATA_INVALID: PrintError(function, "error data was invalid"); break;
+    case ERROR_INIT_DLLS: PrintError(function, "error initializing DLLs"); break;
+    case ERROR_PARAMS: PrintError(function, "error in parameters"); break;
+    case ERROR_GET_PROC_SPEED: PrintError(function, "error getting processors speed"); break;
+    case ERROR_GET_CPU_STATISTICS: PrintError(function, "error getting cpu statistics"); break;
+    case ERROR_GET_TCPUDP_STATISTICS: PrintError(function, "error getting tcp/udp statistics"); break;
+    case ERROR_OUTSTANDING_IOS_PENDING: PrintError(function, "error outstanding IOs still pending"); break;
+    case ERROR_SOCKET: PrintError(function, "error creating socket"); break;
+    case ERROR_SETSOCKOPT: PrintError(function, "error setting socket option"); break;
+    case ERROR_MEMCPY: PrintError(function, "error copying memmory"); break;
+    case ERROR_GETADDRINFO: PrintError(function, "error in getaddrinfo"); break;
+    case ERROR_WSAADDRTOSTRING: PrintError(function, "error in WSAAddrToString"); break;
+    case ERROR_SETTING_TRANSMIT_PACKETS: PrintError(function, "error while setting TransmitPackets function pointer"); break;
+    case ERROR_CONNECT_BIND: PrintError(function, "error in connect/bind function"); break;
+    case ERROR_LISTEN: PrintError(function, "error in listen function"); break;
+    case ERROR_ACCEPT: PrintError(function, "error in accept function"); break;
+    case ERROR_SETUP_NET: PrintError(function, "error in SetupNet function"); break;
+    case ERROR_SEND_DATA_PORTS_TO_SENDERS: PrintError(function, "error sending data ports to senders"); break;
+    case ERROR_SEND_RECEIVE_DATA_PORT: PrintError(function, "error sending or receiving data port"); break;
+    case ERROR_CLOSESOCKET: PrintError(function, "error in closesocket function"); break;
+    case ERROR_CREATE_IO_COML_PORT: PrintError(function, "error in CreateIoCompletionPort function"); break;
+    case ERROR_CREATE_THREAD: PrintError(function, "error in CreateThread function"); break;
+    case ERROR_WORKER_FAILED: PrintError(function, "one or more worker threads failed"); break;
+    case ERROR_ALLOCATING_ASYNCH_BUFFERS: PrintError(function, "error in AllocateAsynchBuffers function"); break;
+    case ERROR_WAIT_ABORTED_BY_CONTROLLER: PrintError(function, "controller aborted connection, this is normal behavior and SHOULD NOT be reported as error (!?)"); break;
+    case ERROR_INITIALIZING_QOS: PrintError(function, "error in QOSCreateHandle"); break;
+    case ERROR_ADDING_SOCKET_TO_QOS: PrintError(function, "error in QOSAddSocketToFlow"); break;
+    case ERROR_CLOSING_QOS: PrintError(function, "error in QOSCloseHandle"); break;
+    case ERROR_CREATING_TIMER_QUEUE_TIMER: PrintError(function, "error in CreateTimerQueueTimer"); break;
+    case ERROR_CLOSING_TIMER_QUEUE_TIMER: PrintError(function, "error in DeleteTimerQueueTimer"); break;
+    case ERROR_FORMING_PAYLOAD: PrintError(function, "error in AddPayloadToBuffer"); break;
+    default:
+        StringCchPrintf(buf, ARRAYSIZE(buf), TEXT("unknown error: %d"), local_error);
+        PrintError(function, buf);
+        break;
     }
 }
 
@@ -1183,7 +1199,7 @@ PrintThreadLocalError(
     __in int thread,
     __nullterminated __in PCHAR function,
     __in int local_error
-    )
+)
 {
     char buf[MAX_ERROR_BUFFER_SIZE];
     StringCchPrintf(buf, ARRAYSIZE(buf), TEXT("%s in thread: %d"), function, thread);
@@ -1194,7 +1210,7 @@ void
 PrintFunctionError(
     __nullterminated __in PCHAR function,
     __in int func_error
-    )
+)
 {
     char buf[MAX_ERROR_BUFFER_SIZE];
     StringCchPrintf(buf, ARRAYSIZE(buf), TEXT("error num.: %d"), func_error);
@@ -1204,20 +1220,22 @@ PrintFunctionError(
 int
 SetDefaultFlags(
     void
-    )
+)
 {
     int err = NO_ERROR;
-    SYSTEM_INFO sbi = {0};
+    SYSTEM_INFO sbi = { 0 };
 
     for (int i = 0; i < MAX_MAPPINGS; ++i) {
         mappings[i] = NULL;
         maps[i].threads = 0;
         maps[i].proc = 0;
+        maps[i].group = 0;
         maps[i].receiver_name = NULL;
     }
 
     GetSystemInfo(&sbi);
-    num_processors  = sbi.dwNumberOfProcessors;
+    num_processors = sbi.dwNumberOfProcessors; //Needs attention. In the fairly rare scenario where a processor group with < 64 CPUs is present (48-core CPUs with SMT, various other oddly-arranged products), calling GetSystemInfo from the small group will prevent worker threads from being scheduled on the large groups.
+    //todo: add num_groups to sbi with similar collection method
     VMSG("NumberOfProcessors: %d\n", num_processors);
 
     proc_speed = GetProcessorSpeed();
@@ -1244,11 +1262,11 @@ SetDefaultFlags(
 int
 ConvertMemoryUnit(
     _In_z_ PCHAR arg
-    )
+)
 {
     int ret = atoi(arg);
-    int units[] = {'k', 'K', 'm', 'M'};
-    int values[] = {KILO, KILO, MEG, MEG};
+    int units[] = { 'k', 'K', 'm', 'M' };
+    int values[] = { KILO, KILO, MEG, MEG };
 
     for (int i = 0; i < 4; ++i) {
         if (NULL != strchr(arg, units[i])) {
@@ -1264,7 +1282,7 @@ ConvertMemoryUnit(
 BOOL
 InitDLLs(
     void
-    )
+)
 {
     BOOL ret = TRUE;
     HANDLE WSockModuleHandle = NULL;
@@ -1312,7 +1330,7 @@ InitDLLs(
         goto error_get_proc_address;
     }
 
-    if(flags.qos_flag) {
+    if (flags.qos_flag) {
         QWaveModuleHandle = LoadLibraryExW(L"QWAVE.DLL", NULL, 0);
         if (QWaveModuleHandle == NULL) {
             VMSG("Could not load qWave.dll\n");
@@ -1330,7 +1348,7 @@ InitDLLs(
         if (NULL == lpQOSCreateHandle) {
             goto error_get_proc_address;
         }
-        lpQOSRemoveSocketFromFlow =(LPFN_QOSREMOVESOCKETFROMFLOW)GetProcAddress(QWaveModuleHandle, "QOSRemoveSocketFromFlow");
+        lpQOSRemoveSocketFromFlow = (LPFN_QOSREMOVESOCKETFROMFLOW)GetProcAddress(QWaveModuleHandle, "QOSRemoveSocketFromFlow");
         if (NULL == lpQOSCreateHandle) {
             goto error_get_proc_address;
         }
@@ -1366,7 +1384,8 @@ InitDLLs(
 
     if (NULL != Kernel32ModuleHandle) {
         lpQueryIdleProcessorCycleTime = GetProcAddress(Kernel32ModuleHandle, "QueryIdleProcessorCycleTime");
-    } else if (NULL != CoreRealtimeModuleHandle) {
+    }
+    else if (NULL != CoreRealtimeModuleHandle) {
         lpQueryIdleProcessorCycleTime = GetProcAddress(CoreRealtimeModuleHandle, "QueryIdleProcessorCycleTime");
     }
     if (NULL == lpQueryIdleProcessorCycleTime) {
@@ -1407,7 +1426,8 @@ error_get_proc_address:
     FreeLibrary(NtDllModuleHandle);
     if (NULL != Kernel32ModuleHandle) {
         FreeLibrary(Kernel32ModuleHandle);
-    } else if (NULL != CoreRealtimeModuleHandle) {
+    }
+    else if (NULL != CoreRealtimeModuleHandle) {
         FreeLibrary(CoreRealtimeModuleHandle);
     }
     FreeLibrary(QWaveModuleHandle);
@@ -1418,8 +1438,8 @@ error_get_proc_address:
 
 error_load_library:
 
-    GetAddrinfo     = NULL;
-    FreeAddrinfo    = NULL;
+    GetAddrinfo = NULL;
+    FreeAddrinfo = NULL;
     lpGetTcpStatsEx = NULL;
     lpGetTcpStatsEx2 = NULL;
     lpGetUdpStatsEx = NULL;
@@ -1445,7 +1465,7 @@ VOID CALLBACK
 PacketSpacingTimerCallback(
     PVOID lpParam,
     BOOLEAN TimerOrWaitFired
-    )
+)
 {
     ASSERT(NULL != send_packet_event_handle);
     if (NULL == lpParam && TRUE == TimerOrWaitFired) {
@@ -1456,23 +1476,23 @@ PacketSpacingTimerCallback(
 // Set up the packet spacing timer, send event and tell system to increase resolution for timers
 BOOL
 SetupPacketSpacingTimer(
-    HANDLE* ppacket_send_timer_handle
-    )
+    HANDLE * ppacket_send_timer_handle
+)
 {
     BOOL res = TRUE;
     int err = NO_ERROR;
 
-    send_packet_event_handle = CreateEvent(NULL,FALSE,FALSE,NULL);
+    send_packet_event_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
     if (NULL == send_packet_event_handle) {
         err = ERROR_CREATE_EVENT;
         goto exit;
     }
     if (TIMERR_NOERROR != timeBeginPeriod(PS_MIN_TIMER_RESOLUTION)) {
         // Alert user but continue test
-        MSG("Unable to set minimum timer resolution to %d. The packet spacing variation will be higher\n",PS_MIN_TIMER_RESOLUTION);
+        MSG("Unable to set minimum timer resolution to %d. The packet spacing variation will be higher\n", PS_MIN_TIMER_RESOLUTION);
     }
-    if(!CreateTimerQueueTimer(ppacket_send_timer_handle, NULL, (WAITORTIMERCALLBACK)PacketSpacingTimerCallback,
-                                NULL, PS_TIMER_START_OFFSET, jitter_packet_period, 0)) {
+    if (!CreateTimerQueueTimer(ppacket_send_timer_handle, NULL, (WAITORTIMERCALLBACK)PacketSpacingTimerCallback,
+        NULL, PS_TIMER_START_OFFSET, jitter_packet_period, 0)) {
         err = ERROR_CREATING_TIMER_QUEUE_TIMER;
         goto exit;
     }
@@ -1489,55 +1509,62 @@ BOOL
 GetTcpUdpStatistics(
     TCP_PACKETS_STATS * my_tcp_stats,
     UDP_PACKETS_STATS * my_udp_stats
-    )
+)
 {
     DWORD err = NO_ERROR;
     int af_inet = (flags.use_ipv6_flag ? AF_INET6 : AF_INET);
-    MIB_TCPSTATS tcp_stats = {0};
-    MIB_TCPSTATS2 tcp_stats2 = {0};
-    MIB_UDPSTATS udp_stats = {0};
-    MIB_UDPSTATS2 udp_stats2 = {0};
+    MIB_TCPSTATS tcp_stats = { 0 };
+    MIB_TCPSTATS2 tcp_stats2 = { 0 };
+    MIB_UDPSTATS udp_stats = { 0 };
+    MIB_UDPSTATS2 udp_stats2 = { 0 };
 
     if (flags.udp_flag) {
         // UDP Statistics
         if (NULL != lpGetUdpStatsEx2) {
-            err = (DWORD) lpGetUdpStatsEx2(&udp_stats2, af_inet);
+            err = (DWORD)lpGetUdpStatsEx2(&udp_stats2, af_inet);
             if (NO_ERROR != err) {
                 PrintFunctionError("GetUdpStatisticsEx2", err);
-            } else {
+            }
+            else {
                 my_udp_stats->received = udp_stats2.dw64InDatagrams;
                 my_udp_stats->ports = udp_stats2.dwNoPorts;
                 my_udp_stats->errors = udp_stats2.dwInErrors;
                 my_udp_stats->out = udp_stats2.dw64OutDatagrams;
             }
-        } else {
-            err = (DWORD) lpGetUdpStatsEx(&udp_stats, af_inet);
+        }
+        else {
+            err = (DWORD)lpGetUdpStatsEx(&udp_stats, af_inet);
             if (NO_ERROR != err) {
                 PrintFunctionError("GetUdpStatisticsEx", err);
-            } else {
+            }
+            else {
                 my_udp_stats->received = udp_stats.dwInDatagrams;
                 my_udp_stats->ports = udp_stats.dwNoPorts;
                 my_udp_stats->errors = udp_stats.dwInErrors;
                 my_udp_stats->out = udp_stats.dwOutDatagrams;
             }
         }
-    } else {
+    }
+    else {
         // TCP Statistics
         if (NULL != lpGetTcpStatsEx2) {
-            err = (DWORD) lpGetTcpStatsEx2(&tcp_stats2, af_inet);
+            err = (DWORD)lpGetTcpStatsEx2(&tcp_stats2, af_inet);
             if (NO_ERROR != err) {
                 PrintFunctionError("GetTcpStatisticsEx2", err);
-            } else {
+            }
+            else {
                 my_tcp_stats->sent = tcp_stats2.dw64OutSegs;
                 my_tcp_stats->received = tcp_stats2.dw64InSegs;
                 my_tcp_stats->errors = tcp_stats2.dwAttemptFails;
                 my_tcp_stats->retransmit = tcp_stats2.dwRetransSegs;
             }
-        } else {
-            err = (DWORD) lpGetTcpStatsEx(&tcp_stats, af_inet);
+        }
+        else {
+            err = (DWORD)lpGetTcpStatsEx(&tcp_stats, af_inet);
             if (NO_ERROR != err) {
                 PrintFunctionError("GetTcpStatisticsEx", err);
-            } else {
+            }
+            else {
                 my_tcp_stats->sent = tcp_stats.dwOutSegs;
                 my_tcp_stats->received = tcp_stats.dwInSegs;
                 my_tcp_stats->errors = tcp_stats.dwAttemptFails;
@@ -1552,10 +1579,10 @@ GetTcpUdpStatistics(
 void
 PrintUsage(
     void
-    )
+)
 {
     printf("\nVersion %s\n", NTTTCP_VERSION);
-    printf("\nNTttcp: [-s|-r|-l|-n|-p|-sp|-ns|-to|-a|-rb|-sb|-u|-w|-d|-t|-cd|-wu|-v|-6|-wa|-nic|-xml|-ndl|-na|-hpt|-uso|-uro|-x|-hv|-nsb|-thr|-brn|-lm|-icp|-cfi|-es|-sam|-qos|-jm|-ps] -m <mappings>\n\n");
+    printf("\nNTttcp: [-s|-r|-l|-n|-p|-sp|-ns|-to|-a|-rb|-sb|-u|-w|-d|-t|-cd|-wu|-v|-6|-wa|-nic|-xml|-ndl|-na|-hpt|-uso|-uro|-x|-hv|-nsb|-thr|-brn|-lm|-icp|-cfi|-es|-sam|-qos|-jm|-ps|-ga] -m <mappings>\n\n");
     printf("\t-s   work as a sender\n");
     printf("\t-r   work as a receiver\n");
     printf("\t-l   <Length of buffer>         [default TCP: 64K, UDP: 128]\n");
@@ -1563,11 +1590,11 @@ PrintUsage(
     printf("\t-p   <port base>                [default: 5001]\n");
     printf("\t-sp  Synchronize data ports, if used -p must be same on every instance.\n");
     printf("\t-ns  No sync. Senders will start sending as soon as possible.\n"
-                    "\t     By default, senders will only start after they perform a handshake\n"
-                    "\t     with receivers verifying readiness, using extra TCP connections.\n"
-                    "\t     The option is helpful for many-thread tests, reducing time for\n"
-                    "\t     the test to start and increasing the max allowed connections.\n"
-                    "\t     Either all or none of the NTttcp instances must have this option.\n");
+        "\t     By default, senders will only start after they perform a handshake\n"
+        "\t     with receivers verifying readiness, using extra TCP connections.\n"
+        "\t     The option is helpful for many-thread tests, reducing time for\n"
+        "\t     the test to start and increasing the max allowed connections.\n"
+        "\t     Either all or none of the NTttcp instances must have this option.\n");
     printf("\t-to  <timeout> in milliseconds. [default: %d]\n", wait_timeout_milliseconds);
     printf("\t     I/O and thread waits will fail if hung for this duration.\n");
     printf("\t     Set to 0 for infinite timeouts.  (NTttcp may hang indefinitely.)\n");
@@ -1586,7 +1613,7 @@ PrintUsage(
     printf("\t-rt  enable roundtrip mode\n");
     printf("\t-d   Verify Flag\n");
     printf("\t-t   <Runtime> in seconds. When with -n mans max test time and disables\n"
-                    "\t     -wu and -cd flags.         [default (with -n): 3h]\n");
+        "\t     -wu and -cd flags.         [default (with -n): 3h]\n");
     printf("\t-cd  <Cool-down> in seconds\n");
     printf("\t-wu  <Warm-up> in seconds\n");
     printf("\t-v   enable verbose mode\n");
@@ -1596,8 +1623,8 @@ PrintUsage(
     printf("\t     Use NIC with <NIC IP> for sending data (sender only).\n");
     printf("\t-xml [filename] save XML output to a file, by default saves to xml.txt\n");
     printf("\t-na  <NUMA node number> Affinitize process to a particular NUMA node.\n"
-                    "\t     If -m mapping specifies a processor number, this option\n"
-                    "\t     has no effect.\n");
+        "\t     If -m mapping specifies a processor number, this option\n"
+        "\t     has no effect.\n");
     printf("\t-hpt hide per thread stats\n");
     printf("\t-uso <Message size> Enable UDP segmentation offload with this maximum\n");
     printf("\t     message size.\n");
@@ -1632,27 +1659,28 @@ PrintUsage(
     printf("\t-jm  [filename] Jitter measurement:\n");
     printf("\t     measure and output packet arrival time. Sender should not include\n");
     printf("\t     a filename but the receiver must specify the output file.\n"
-                    "\t     Buffer length must be greater than or equal to 20 bytes.\n");
+        "\t     Buffer length must be greater than or equal to 20 bytes.\n");
     printf("\t     The output format is a CSV with the following headers:\n");
     printf("\t     packet_num , send_count, send_freq, recv_count, recv_freq\n");
     printf("\t-ps  <duration (ms)> Wait between buffer sends in ms (sender only).\n");
     printf("\t     Packet spacing is only supported for 1 thread synchronous sending.\n");
     printf("\t     The spacing must be between %d and %d ms.\n", PS_MIN_PACKET_PERIOD, PS_MAX_PACKET_PERIOD);
     printf("\t     -thr and -brn are not supported options when -ps is used.\n");
+    printf("\t-ga  Enable processor group awareness for systems with more than 64 logical processors.\n");
     printf("\t-m   <mappings>\n"
-           "\t     One or more mapping 3-tuples separated by spaces:\n"
-           "\t     (number of threads, processor number, receiver address or name)\n"
-           "\t     Processor number must be in the process kgroup. If processor number\n"
-           "\t     is \"*\", the threads are not affinitized.\n"
-           "\t     e.g. \"-m 4,0,1.2.3.4 2,*,contoso\" sets up:\n"
-           "\t      -4 threads on processor 0 to connect to 1.2.3.4\n"
-           "\t      -2 unaffinitized threads to connect to contoso\n");
+        "\t     One or more mapping 3-tuples separated by spaces:\n"
+        "\t     (number of threads, processor number, receiver address or name)\n"
+        "\t     Processor number must be in the process kgroup. If processor number\n"
+        "\t     is \"*\", the threads are not affinitized.\n"
+        "\t     e.g. \"-m 4,0,1,1.2.3.4 2,*,contoso\" sets up:\n"
+        "\t      -4 threads on processor 0 in processor group 1 to connect to 1.2.3.4\n"
+        "\t      -2 unaffinitized threads to connect to contoso\n");
 }
 
 void
 PrintFlags(
     void
-    )
+)
 {
     int i = 0;
 
@@ -1706,6 +1734,7 @@ PrintFlags(
 enum {
     S_THREADS = 0,
     S_PROCESSOR,
+    S_KGROUP,
     S_HOST,
     S_DONE
 };
@@ -1713,7 +1742,7 @@ enum {
 BOOL
 ProcessMappings(
     void
-    )
+)
 {
     BOOL ret = TRUE;
     int i = 0;
@@ -1730,6 +1759,7 @@ ProcessMappings(
         //
         // - Number of threads to run
         // - The processor mask for thread affinity
+        // - The kgroup of the processor for thread affinity, if enabled
         // - The host machine IP address
 
         while (NULL != token) {
@@ -1752,11 +1782,13 @@ ProcessMappings(
 
                 maps[i].threads = threads;
                 ++state;
-            } else if (S_PROCESSOR == state) {
+            }
+            else if (S_PROCESSOR == state) {
                 if (0 == _stricmp(token, "*")) {
                     processor = NO_HARD_AFFINITY;
-                } else {
-                    processor =  atoi(token);
+                }
+                else {
+                    processor = atoi(token);
                     if ((0 > processor) || (processor >= num_processors)) {
                         PrintError(__FUNCTION__, "processor in -m option");
                         ret = FALSE;
@@ -1766,17 +1798,28 @@ ProcessMappings(
 
                 maps[i].proc = processor;
                 ++state;
-            } else if (S_HOST == state) {
-                maps[i].receiver_name = token;
-
+            }
+            else if (S_KGROUP == state) {
+                if (flags.group_aware)
+                {
+                    maps[i].group = (WORD)strtoul(token, NULL, 0);
+                }
                 ++state;
-            } else {
+            }
+            else if (S_HOST == state) {
+                maps[i].receiver_name = token;
+                ++state;
+            }
+            else {
                 PrintError(__FUNCTION__, "wrong state in -m option");
                 ret = FALSE;
                 goto exit;
             }
 
-            token = strtok(NULL, ",");
+            if (!(S_KGROUP == state && !flags.group_aware))
+            { //Don't advance the token if there wasn't a kgroup token specified
+                token = strtok(NULL, ",");
+            }
         }
 
         if (S_DONE != state) {
@@ -1796,19 +1839,19 @@ exit:
 BOOL
 IsUserAdmin(
     void
-    )
+)
 {
     SID_IDENTIFIER_AUTHORITY sidAuth = SECURITY_NT_AUTHORITY;
-    PSID psid = {0};
+    PSID psid = { 0 };
     BOOL is_admin = TRUE;
 
     // Allocate a SID for the Administrators group and check to see if the user is a member.
     if (AllocateAndInitializeSid(&sidAuth,
-                                 2,
-                                 SECURITY_BUILTIN_DOMAIN_RID,
-                                 DOMAIN_ALIAS_RID_ADMINS,
-                                 0, 0, 0, 0, 0, 0,
-                                 &psid)) {
+        2,
+        SECURITY_BUILTIN_DOMAIN_RID,
+        DOMAIN_ALIAS_RID_ADMINS,
+        0, 0, 0, 0, 0, 0,
+        &psid)) {
         if (!CheckTokenMembership(NULL, psid, &is_admin)) {
             is_admin = FALSE;
         }
@@ -1820,29 +1863,37 @@ IsUserAdmin(
 BOOL
 VerifyArgs(
     void
-    )
+)
 {
     BOOL ret = FALSE;
 
     if (flags.wsa_flag && !flags.async_flag) {
         PrintError(__FUNCTION__, "No support for WSA APIs with sync");
-    } else if (flags.wsa_flag && flags.tp_flag) {
+    }
+    else if (flags.wsa_flag && flags.tp_flag) {
         PrintError(__FUNCTION__, "no support for WSA APIs and TransmitPackets");
-    } else if (!flags.async_flag && flags.tp_flag) {
+    }
+    else if (!flags.async_flag && flags.tp_flag) {
         PrintError(__FUNCTION__, "no support for TransmitPackets in synchronous mode");
-    } else if (!flags.send_flag && flags.tp_flag) {
+    }
+    else if (!flags.send_flag && flags.tp_flag) {
         PrintError(__FUNCTION__, "no support for TransmitPackets in receive mode");
-    } else if (flags.wait_all_flag && !(flags.wsa_flag || !flags.async_flag)) {
+    }
+    else if (flags.wait_all_flag && !(flags.wsa_flag || !flags.async_flag)) {
         PrintError(__FUNCTION__,
-                   "full read flag supported only in synchronous mode or with "
-                   "WSA flag");
-    } else if (0 >= num_mappings) {
+            "full read flag supported only in synchronous mode or with "
+            "WSA flag");
+    }
+    else if (0 >= num_mappings) {
         PrintError(__FUNCTION__, "Option: -m <mapping> is missing");
-    } else if (flags.bind_sender_flag && !flags.send_flag) {
+    }
+    else if (flags.bind_sender_flag && !flags.send_flag) {
         PrintError(__FUNCTION__, "cannot use -nic option in receive mode");
-    } else if (0 < throughput_Bpms && !flags.send_flag) {
+    }
+    else if (0 < throughput_Bpms && !flags.send_flag) {
         PrintError(__FUNCTION__, "Throughput throttling only in send mode.");
-    } else if (!flags.no_sync && num_threads_total >= MAX_NUM_CONNECTIONS) {
+    }
+    else if (!flags.no_sync && num_threads_total >= MAX_NUM_CONNECTIONS) {
         // Without the no_sync option, we need a TCP port range for control connections.
         // The MAX_NUM_CONNECTIONS limit helps provide this free port range.
         char err[MAX_ERROR_BUFFER_SIZE];
@@ -1852,26 +1903,36 @@ VerifyArgs(
             MAX_NUM_CONNECTIONS);
 
         PrintError(__FUNCTION__, err);
-    } else if (flags.udp_flag && flags.get_estats) {
+    }
+    else if (flags.udp_flag && flags.get_estats) {
         PrintError(__FUNCTION__, "EStats information cannot be retrieved for UDP Ports.");
-    } else if (flags.get_estats && !IsUserAdmin()) {
+    }
+    else if (flags.get_estats && !IsUserAdmin()) {
         PrintError(__FUNCTION__, "need to be admin to run -es option.");
-    } else if (flags.sampling && !flags.time_flag) {
+    }
+    else if (flags.sampling && !flags.time_flag) {
         PrintError(__FUNCTION__, "Sampling works only with time flag (-t).");
-    } else if (flags.packet_spacing_flag && 1 < num_threads_total) {
+    }
+    else if (flags.packet_spacing_flag && 1 < num_threads_total) {
         PrintError(__FUNCTION__, "Packet spacing mode is only supported for 1 thread.");
-    } else if (flags.packet_spacing_flag && flags.async_flag) {
+    }
+    else if (flags.packet_spacing_flag && flags.async_flag) {
         PrintError(__FUNCTION__, "Packet spacing mode is only supported in synchronous mode.");
-    } else if (flags.packet_spacing_flag && !flags.send_flag) {
+    }
+    else if (flags.packet_spacing_flag && !flags.send_flag) {
         PrintError(__FUNCTION__, "cannot use -ps in receive mode");
-    } else if (flags.packet_spacing_flag && 0 < throughput_Bpms) {
+    }
+    else if (flags.packet_spacing_flag && 0 < throughput_Bpms) {
         PrintError(__FUNCTION__, "Packet spacing mode and -thr are not supported");
-    } else if (flags.packet_spacing_flag && 0 < cpu_burn) {
+    }
+    else if (flags.packet_spacing_flag && 0 < cpu_burn) {
         PrintError(__FUNCTION__, "Packet spacing mode and -brn are not supported");
-    } else if ((flags.jitter_measurement) &&
-             (buffers_length < (long)(sizeof(ULONG) + sizeof(ULONGLONG) + sizeof(ULONGLONG)))) {
+    }
+    else if ((flags.jitter_measurement) &&
+        (buffers_length < (long)(sizeof(ULONG) + sizeof(ULONGLONG) + sizeof(ULONGLONG)))) {
         PrintError(__FUNCTION__, "Buffer size is too small for jitter measurement mode");
-    } else if (flags.async_flag && !flags.use_io_compl_ports && MAXIMUM_WAIT_OBJECTS <= async_count) {
+    }
+    else if (flags.async_flag && !flags.use_io_compl_ports && MAXIMUM_WAIT_OBJECTS <= async_count) {
         // WaitForMultipleObjects limit - we use 1 extra entry beyond the I/O count for an abort signal
         char err[MAX_ERROR_BUFFER_SIZE];
 
@@ -1880,17 +1941,23 @@ VerifyArgs(
             MAXIMUM_WAIT_OBJECTS);
 
         PrintError(__FUNCTION__, err);
-    } else if (flags.roundtrip && flags.async_flag) {
+    }
+    else if (flags.roundtrip && flags.async_flag) {
         PrintError(__FUNCTION__, "No support for async roundtrip");
-    } else if (udp_uso_size != 0 && (!flags.send_flag || !flags.udp_flag)) {
+    }
+    else if (udp_uso_size != 0 && (!flags.send_flag || !flags.udp_flag)) {
         PrintError(__FUNCTION__, "-uso requires -s and -u");
-    } else if (flags.udp_receive_coalescing && (flags.send_flag || !flags.udp_flag)) {
+    }
+    else if (flags.udp_receive_coalescing && (flags.send_flag || !flags.udp_flag)) {
         PrintError(__FUNCTION__, "-uro requires -r and -u");
-    } else if (flags.udp_unconnected_flag && !flags.udp_flag) {
+    }
+    else if (flags.udp_unconnected_flag && !flags.udp_flag) {
         PrintError(__FUNCTION__, "unconnected UDP requires UDP");
-    } else if (flags.udp_unconnected_flag && flags.async_flag) {
+    }
+    else if (flags.udp_unconnected_flag && flags.async_flag) {
         PrintError(__FUNCTION__, "no support for async unconnected UDP");
-    } else {
+    }
+    else {
         ret = TRUE;
     }
 
@@ -1900,7 +1967,7 @@ VerifyArgs(
 long
 KBpsToBpms(
     long throughput
-    )
+)
 {
     return throughput * 1024 / 1000;
 }
@@ -1908,8 +1975,8 @@ KBpsToBpms(
 BOOL
 ProcessArgs(
     int argc,
-    _In_reads_(argc) LPSTR* argv
-    )
+    _In_reads_(argc) LPSTR * argv
+)
 {
     int i = 1;
     BOOL ret = TRUE;
@@ -1928,84 +1995,99 @@ ProcessArgs(
 
     if (program_name == NULL) {
         program_name = argv[0];
-    } else {
+    }
+    else {
         ++program_name;
     }
 
     if ((0 == _stricmp(program_name, "ntttcps.exe")) ||
         (0 == _stricmp(program_name, "ntttcps"))) {
         flags.send_flag = TRUE;
-    } else if ((0 == _stricmp(program_name, "ntttcpr.exe")) ||
+    }
+    else if ((0 == _stricmp(program_name, "ntttcpr.exe")) ||
         (0 == _stricmp(program_name, "ntttcpr"))) {
         flags.send_flag = FALSE;
     }
 
-    while ((i+1) <= argc) {
+    while ((i + 1) <= argc) {
         if (0 == _stricmp(argv[i], "-s")) {
             flags.send_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-r")) {
+        }
+        else if (0 == _stricmp(argv[i], "-r")) {
             flags.send_flag = FALSE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-l")) {
+        }
+        else if (0 == _stricmp(argv[i], "-l")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-l option");
                 ret = FALSE;
-            } else {
-                buffers_length = ConvertMemoryUnit(argv[i+1]);
+            }
+            else {
+                buffers_length = ConvertMemoryUnit(argv[i + 1]);
                 if (0 >= buffers_length) {
                     PrintError(__FUNCTION__, "-l option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     is_buff_size_set = TRUE;
                     i += 2;
                 }
             }
-        } else if (0 == _stricmp(argv[i], "-n")) {
+        }
+        else if (0 == _stricmp(argv[i], "-n")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-n option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 if (flags.time_flag) {
                     dash_n_timeout = run_time;
                     flags.time_flag = FALSE;
                 }
 
-                num_buffers_to_send = ConvertMemoryUnit(argv[i+1]);
+                num_buffers_to_send = ConvertMemoryUnit(argv[i + 1]);
 
                 if (0 >= num_buffers_to_send) {
                     PrintError(__FUNCTION__, "-n option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     is_n_flag_set = TRUE;
                     i += 2;
                 }
             }
-        } else if (0 == _stricmp(argv[i], "-sb")) {
+        }
+        else if (0 == _stricmp(argv[i], "-sb")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-sb option");
                 ret = FALSE;
-            } else {
-                send_socket_buff = ConvertMemoryUnit(argv[i+1]);
+            }
+            else {
+                send_socket_buff = ConvertMemoryUnit(argv[i + 1]);
                 // allow negative values to be used meaning SO_SNDBUF
                 // should NOT be set.
                 is_socket_buf_size_set = TRUE;
                 i += 2;
             }
-        } else if (0 == _stricmp(argv[i], "-rb")) {
+        }
+        else if (0 == _stricmp(argv[i], "-rb")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-rb option");
                 ret = FALSE;
-            } else {
-                recv_socket_buff = ConvertMemoryUnit(argv[i+1]);
+            }
+            else {
+                recv_socket_buff = ConvertMemoryUnit(argv[i + 1]);
                 i += 2;
             }
-        } else if (0 == _stricmp(argv[i], "-xml")) {
+        }
+        else if (0 == _stricmp(argv[i], "-xml")) {
             if (argc > i + 1 && argv[i + 1] != NULL && argv[i + 1][0] != '-') {
 
-                XMLFileHandle = fopen(argv[i+1], "a+");
+                XMLFileHandle = fopen(argv[i + 1], "a+");
                 i += 2;
-            } else {
+            }
+            else {
                 XMLFileHandle = fopen("xml.txt", "at+");
                 ++i;
             }
@@ -2013,27 +2095,33 @@ ProcessArgs(
             if (NULL == XMLFileHandle) {
                 PrintError(__FUNCTION__, "fopen XML File");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 flags.xml_flag = TRUE;
             }
-        } else if (0 == _stricmp(argv[i], "-p")) {
+        }
+        else if (0 == _stricmp(argv[i], "-p")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-p option");
                 ret = FALSE;
-            } else {
-                port = atoi(argv[i+1]);
+            }
+            else {
+                port = atoi(argv[i + 1]);
 
                 if (0 >= port) {
                     PrintError(__FUNCTION__, "-p option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     i += 2;
                 }
             }
-        } else if (0 == _stricmp(argv[i], "-w")) {
+        }
+        else if (0 == _stricmp(argv[i], "-w")) {
             flags.wsa_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-a")) {
+        }
+        else if (0 == _stricmp(argv[i], "-a")) {
             flags.async_flag = TRUE;
             ++i;
 
@@ -2043,50 +2131,63 @@ ProcessArgs(
                 if (0 >= async_count) {
                     PrintError(__FUNCTION__, "-a option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     if (!is_socket_buf_size_set) {
                         send_socket_buff = 0;  // this is more common
                     }
                     ++i;
                 }
             }
-        } else if (0 == _stricmp(argv[i], "-t")) {
+        }
+        else if (0 == _stricmp(argv[i], "-t")) {
             if (argc <= i + 1 || NULL == argv[i + 1]) {
                 PrintError(__FUNCTION__, "-t option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 if (is_n_flag_set) {
-                    dash_n_timeout = ConvertMemoryUnit(argv[i+1]) * 1000;
+                    dash_n_timeout = ConvertMemoryUnit(argv[i + 1]) * 1000;
 
                     if (0 >= dash_n_timeout) {
                         PrintError(__FUNCTION__, "-t option (with -n set)");
                         ret = FALSE;
                     }
-                } else {
-                    run_time = 1000 * atoi(argv[i+1]);
+                }
+                else {
+                    run_time = 1000 * atoi(argv[i + 1]);
 
                     if (0 >= run_time) {
                         PrintError(__FUNCTION__, "-t option");
                         ret = FALSE;
-                    } else {
+                    }
+                    else {
                         flags.time_flag = TRUE;
                     }
                 }
 
                 i += 2;
             }
-        } else if (0 == _stricmp(argv[i], "-cd")) {
+        }
+        else if (0 == _stricmp(argv[i], "-cd")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-cd option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 cooldown_time = 1000 * atoi(argv[i]);
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-wu")) {
+        }
+        else if (0 == _stricmp(argv[i], "-ga")) {
+            ++i;
+            flags.group_aware = TRUE;
+
+        }
+        else if (0 == _stricmp(argv[i], "-wu")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
@@ -2098,60 +2199,72 @@ ProcessArgs(
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-nic")) {
+        }
+        else if (0 == _stricmp(argv[i], "-nic")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-nic option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 flags.bind_sender_flag = TRUE;
                 StringCbCopy(sender_name, MAX_IP_STR_LEN, argv[i]);
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-sp")) {
+        }
+        else if (0 == _stricmp(argv[i], "-sp")) {
             flags.sync_port = TRUE;
             ++i;
         }
         else if (0 == _stricmp(argv[i], "-ns")) {
             flags.no_sync = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-to")) {
+        }
+        else if (0 == _stricmp(argv[i], "-to")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-to option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 wait_timeout_milliseconds = atoi(argv[i]);
                 if (wait_timeout_milliseconds == 0) {
                     wait_timeout_milliseconds = INFINITE;
                 }
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-6")) {
+        }
+        else if (0 == _stricmp(argv[i], "-6")) {
             flags.use_ipv6_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-v")) {
+        }
+        else if (0 == _stricmp(argv[i], "-v")) {
             flags.verbose_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-u")) {
+        }
+        else if (0 == _stricmp(argv[i], "-u")) {
             flags.udp_flag = TRUE;
             if (!is_buff_size_set) {
                 buffers_length = DEFAULT_UDP_DGRAM;
             }
             ++i;
-        } else if (0 == _stricmp(argv[i], "-d")) {
+        }
+        else if (0 == _stricmp(argv[i], "-d")) {
             flags.verify_data_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-wa")) {
+        }
+        else if (0 == _stricmp(argv[i], "-wa")) {
             flags.wait_all_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-ndl")) {
+        }
+        else if (0 == _stricmp(argv[i], "-ndl")) {
             flags.no_delay = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-m")) {
+        }
+        else if (0 == _stricmp(argv[i], "-m")) {
             ++i;
 
             if (is_mapping_found) {
@@ -2162,7 +2275,7 @@ ProcessArgs(
             is_mapping_found = TRUE;
             num_mappings = 0;
 
-            while (((i+1) <= argc) && (argv[i] != NULL) && (argv[i][0] != '-')) {
+            while (((i + 1) <= argc) && (argv[i] != NULL) && (argv[i][0] != '-')) {
                 if (num_mappings >= MAX_MAPPINGS) {
                     PrintError(__FUNCTION__, "too many mappings");
                     ret = FALSE;
@@ -2175,12 +2288,14 @@ ProcessArgs(
             }
 
             ret = ProcessMappings();
-        } else if (0 == _stricmp(argv[i], "-na")) {
+        }
+        else if (0 == _stricmp(argv[i], "-na")) {
             ++i;
             if (NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-na option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 node_affinity = atoi(argv[i]);
                 if (node_affinity < 0) {
                     PrintError(__FUNCTION__, "-na option");
@@ -2188,10 +2303,12 @@ ProcessArgs(
                 }
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-hpt")) {
+        }
+        else if (0 == _stricmp(argv[i], "-hpt")) {
             flags.hide_per_thread_stats = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-uso")) {
+        }
+        else if (0 == _stricmp(argv[i], "-uso")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
@@ -2203,34 +2320,43 @@ ProcessArgs(
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-uro")) {
+        }
+        else if (0 == _stricmp(argv[i], "-uro")) {
             flags.udp_receive_coalescing = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-uc")) {
+        }
+        else if (0 == _stricmp(argv[i], "-uc")) {
             flags.udp_unconnected_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-hv")) {
+        }
+        else if (0 == _stricmp(argv[i], "-hv")) {
             flags.use_hvsocket_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-nsb")) {
+        }
+        else if (0 == _stricmp(argv[i], "-nsb")) {
             flags.no_stdio_buffer = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-es")) {
+        }
+        else if (0 == _stricmp(argv[i], "-es")) {
             flags.get_estats = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-cfi")) {
+        }
+        else if (0 == _stricmp(argv[i], "-cfi")) {
             flags.cpu_from_idle_flag = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-lm")) {
+        }
+        else if (0 == _stricmp(argv[i], "-lm")) {
             flags.latency_measurement = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-rt")) {
+        }
+        else if (0 == _stricmp(argv[i], "-rt")) {
             flags.roundtrip = TRUE;
 
             //enable latency measurements for roundtrip mode.
             flags.latency_measurement = TRUE;
             ++i;
-        } else if (0 == _stricmp(argv[i], "-x")) {
+        }
+        else if (0 == _stricmp(argv[i], "-x")) {
             flags.tp_flag = TRUE;
             ++i;
 
@@ -2240,56 +2366,66 @@ ProcessArgs(
                 if (0 >= send_count) {
                     PrintError(__FUNCTION__, "-x option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     ++i;
                 }
             }
-        } else if (0 == _stricmp(argv[i], "-thr")) {
+        }
+        else if (0 == _stricmp(argv[i], "-thr")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-thr option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 throughput_Bpms = KBpsToBpms(atoi(argv[i]));
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-brn")) {
+        }
+        else if (0 == _stricmp(argv[i], "-brn")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-brn option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 cpu_burn = atoi(argv[i]);
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-icp")) {
+        }
+        else if (0 == _stricmp(argv[i], "-icp")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-icp option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 max_active_threads = atoi(argv[i]);
                 flags.use_io_compl_ports = TRUE;
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-sam")) {
+        }
+        else if (0 == _stricmp(argv[i], "-sam")) {
             ++i;
 
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-sam option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 sample_time = atoi(argv[i]) * 1000;
 
                 if (sample_time <= 0) {
                     PrintError(__FUNCTION__, "-sam option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     flags.sampling = TRUE;
                     // ceiling(run_time / sample_time)
                     num_samples = run_time / sample_time + !!(run_time % sample_time);
@@ -2297,40 +2433,43 @@ ProcessArgs(
 
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-qos")) {
+        }
+        else if (0 == _stricmp(argv[i], "-qos")) {
             ++i;
             if (argc <= i || NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-qos option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 flags.qos_flag = TRUE;
-                switch(atoi(argv[i])) {
-                    case 0:
-                        qos_priority = QOSTrafficTypeBestEffort;
-                        break;
-                    case 1:
-                        qos_priority = QOSTrafficTypeBackground;
-                        break;
-                    case 2:
-                        qos_priority = QOSTrafficTypeExcellentEffort;
-                        break;
-                    case 3:
-                        qos_priority = QOSTrafficTypeAudioVideo;
-                        break;
-                    case 4:
-                        qos_priority = QOSTrafficTypeVoice;
-                        break;
-                    case 5:
-                        qos_priority = QOSTrafficTypeControl;
-                        break;
-                    default:
-                        PrintError(__FUNCTION__, "-qos option");
-                        ret = FALSE;
-                        break;
+                switch (atoi(argv[i])) {
+                case 0:
+                    qos_priority = QOSTrafficTypeBestEffort;
+                    break;
+                case 1:
+                    qos_priority = QOSTrafficTypeBackground;
+                    break;
+                case 2:
+                    qos_priority = QOSTrafficTypeExcellentEffort;
+                    break;
+                case 3:
+                    qos_priority = QOSTrafficTypeAudioVideo;
+                    break;
+                case 4:
+                    qos_priority = QOSTrafficTypeVoice;
+                    break;
+                case 5:
+                    qos_priority = QOSTrafficTypeControl;
+                    break;
+                default:
+                    PrintError(__FUNCTION__, "-qos option");
+                    ret = FALSE;
+                    break;
                 }
                 ++i;
             }
-        } else if (0 == _stricmp(argv[i], "-jm")) {
+        }
+        else if (0 == _stricmp(argv[i], "-jm")) {
             i++;
             if ((argv[i] != NULL) && (argv[i][0] != '-')) {
                 JitterFileHandle = fopen(argv[i], "a+");
@@ -2344,23 +2483,27 @@ ProcessArgs(
                 }
             }
             flags.jitter_measurement = TRUE;
-        } else if (0 == _stricmp(argv[i], "-ps")) {
+        }
+        else if (0 == _stricmp(argv[i], "-ps")) {
             ++i;
             if (NULL == argv[i]) {
                 PrintError(__FUNCTION__, "-ps option");
                 ret = FALSE;
-            } else {
+            }
+            else {
                 jitter_packet_period = atoi(argv[i]);
-                if(PS_MIN_PACKET_PERIOD > jitter_packet_period ||
-                   PS_MAX_PACKET_PERIOD < jitter_packet_period    ) {
+                if (PS_MIN_PACKET_PERIOD > jitter_packet_period ||
+                    PS_MAX_PACKET_PERIOD < jitter_packet_period) {
                     PrintError(__FUNCTION__, "-ps option");
                     ret = FALSE;
-                } else {
+                }
+                else {
                     flags.packet_spacing_flag = TRUE;
                 }
                 ++i;
             }
-        } else {
+        }
+        else {
             MSG("Unknown option(s)");
             ret = FALSE;
         }
@@ -2375,7 +2518,8 @@ exit:
     if (!ret || !VerifyArgs()) {
         ret = FALSE;
         PrintUsage();
-    } else {
+    }
+    else {
         if (flags.time_flag) {
             num_buffers_to_send = MAX_NUM_BUFFERS_TO_SEND;
         }
@@ -2399,7 +2543,7 @@ BOOL
 IsDataCorrect(
     __in_bcount(length) char* buffer,
     __in long length
-    )
+)
 {
     BOOL ret = TRUE;
 
@@ -2409,20 +2553,22 @@ IsDataCorrect(
                 ret = FALSE;
             }
         }
-    } else {
-        if (*((int *)buffer) != 'AAAA' ||
-            *(((int *)(buffer + length)) - 1) != 'AAAA') {
+    }
+    else {
+        if (*((int*)buffer) != 'AAAA' ||
+            *(((int*)(buffer + length)) - 1) != 'AAAA') {
             ret = FALSE;
-        } else {
+        }
+        else {
             int num_loops =
                 (int)(((ULONG_PTR)(buffer + length)) / sizeof(int) -
-                     ((ULONG_PTR)(buffer + sizeof(int) - 1)) / sizeof(int));
+                    ((ULONG_PTR)(buffer + sizeof(int) - 1)) / sizeof(int));
 
             for (int i = 0; i < num_loops; ++i) {
-                ASSERT((ULONG_PTR)((int *)(buffer) + i + 1) <=
-                       (ULONG_PTR)(buffer + length));
+                ASSERT((ULONG_PTR)((int*)(buffer)+i + 1) <=
+                    (ULONG_PTR)(buffer + length));
 
-                if (((int *)buffer)[i] != 'AAAA') {
+                if (((int*)buffer)[i] != 'AAAA') {
                     ret = FALSE;
                 }
             }
@@ -2437,32 +2583,32 @@ GetCpuStatistics(
     PSYSTEM_PROCESSOR_PERFORMANCE_INFORMATION proc_perf,
     PSYSTEM_INTERRUPT_INFORMATION isr_perf,
     PCPU_UTIL_INFO cpu_util_info
-    )
+)
 {
     BOOL success = FALSE;
 
     success =
-            lpNtQuerySystemInformation(
-                8, // SystemProcessorPerformanceInformation
-                proc_perf,
-                sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) *
-                    num_processors,
-                NULL) == 0;
+        lpNtQuerySystemInformation(
+            8, // SystemProcessorPerformanceInformation
+            proc_perf,
+            sizeof(SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION) *
+            num_processors,
+            NULL) == 0;
 
     success &=
-            lpNtQuerySystemInformation(
-                23, // SystemInterruptInformation
-                isr_perf,
-                sizeof(SYSTEM_INTERRUPT_INFORMATION) *
-                    num_processors,
-                NULL) == 0;
+        lpNtQuerySystemInformation(
+            23, // SystemInterruptInformation
+            isr_perf,
+            sizeof(SYSTEM_INTERRUPT_INFORMATION) *
+            num_processors,
+            NULL) == 0;
 
     if (flags.cpu_from_idle_flag) {
-        ASSERT (NULL != lpQueryIdleProcessorCycleTime);
-        ASSERT (NULL != cpu_util_info);
-        ASSERT (0 != num_processors);
+        ASSERT(NULL != lpQueryIdleProcessorCycleTime);
+        ASSERT(NULL != cpu_util_info);
+        ASSERT(0 != num_processors);
         cpu_util_info->buffer_length = num_processors * sizeof(ULONG64);
-        success &= ((BOOL) lpQueryIdleProcessorCycleTime(&cpu_util_info->buffer_length, cpu_util_info->processor_idle_cycle_time));
+        success &= ((BOOL)lpQueryIdleProcessorCycleTime(&cpu_util_info->buffer_length, cpu_util_info->processor_idle_cycle_time));
     }
 
     return success;
@@ -2475,14 +2621,15 @@ BOOL SetupThreads(
     int num_threads,
     int start_index,
     int processor,
+    WORD group,
     __in PCHAR receiver_name,
     HANDLE io_compl_port,
     HANDLE send_token,
     HANDLE start_test,
     HANDLE abort_ios,
-    HANDLE * const threads_ready,
-    HANDLE * const threads_synched,
-    HANDLE * const threads_finished,
+    HANDLE* const threads_ready,
+    HANDLE* const threads_synched,
+    HANDLE* const threads_finished,
     LPTHREAD_START_ROUTINE routine)
 {
     int ret = NO_ERROR;
@@ -2493,7 +2640,7 @@ BOOL SetupThreads(
     VMSG("SetupThreads\n");
     VMSG("Threads: %d\tProcessor: %d\tHost: %s\n", num_threads, processor, receiver_name);
 
-    php = calloc (num_threads, sizeof(PHP));
+    php = calloc(num_threads, sizeof(PHP));
     if (NULL == php) {
         ret = ERROR_MEMORY_ALLOC;
         goto exit;
@@ -2503,10 +2650,11 @@ BOOL SetupThreads(
         index = start_index + i;
 
         php[i].index = index;
-        php[i].proc  = processor;
+        php[i].proc = processor;
         php[i].receiver_name = receiver_name;
         php[i].sender_name = sender_name;
-        php[i].port  = port;
+        php[i].port = port;
+        php[i].group = group;
         php[i].io_compl_port = io_compl_port;
         php[i].send_token = send_token;
         php[i].start_test = start_test;
@@ -2544,15 +2692,15 @@ GetHostInfoByName(
     _In_ const int port,
     _In_ const BOOL udp_flag,
     _Out_ struct addrinfo** addr_info
-    )
+)
 {
     int err = NO_ERROR;
     const int af_inet = flags.use_ipv6_flag ? AF_INET6 : AF_INET;
     const int socket_type = udp_flag ? SOCK_DGRAM : SOCK_STREAM;
-    char port_str[MAX_PORT_STR_LEN] = {0};
-    char addr_buffer[MAX_IP_STR_LEN] = {0};
+    char port_str[MAX_PORT_STR_LEN] = { 0 };
+    char addr_buffer[MAX_IP_STR_LEN] = { 0 };
     int addr_buffer_len = sizeof(addr_buffer);
-    struct addrinfo hints = {0};
+    struct addrinfo hints = { 0 };
 
     hints.ai_family = af_inet;
     hints.ai_socktype = socket_type;
@@ -2575,10 +2723,10 @@ GetHostInfoByName(
     }
 
     if (0 != WSAAddressToString((*addr_info)->ai_addr,
-                                (DWORD) (*addr_info)->ai_addrlen,
-                                NULL,
-                                addr_buffer,
-                                (LPDWORD) &addr_buffer_len)) {
+        (DWORD)(*addr_info)->ai_addrlen,
+        NULL,
+        addr_buffer,
+        (LPDWORD)&addr_buffer_len)) {
         VMSG("ERROR: %s, WSAAddressToString returned %d\n", __FUNCTION__, WSAGetLastError());
         err = ERROR_WSAADDRTOSTRING;
         goto exit;
@@ -2610,12 +2758,12 @@ SetupNet(
     _In_ const BOOL bind_sender_flag,
     _In_ const int backlog,
     _In_ const BOOL do_accept
-    )
+)
 {
     int err = NO_ERROR;
     SOCKET sd = INVALID_SOCKET;
-    GUID targetVmGuid = {0};
-    SOCKADDR_HV sockAddrHv = {0};
+    GUID targetVmGuid = { 0 };
+    SOCKADDR_HV sockAddrHv = { 0 };
     const int sock_protocol = use_hvsocket_flag ? HV_PROTOCOL_RAW : 0;
     int af_inet = use_ipv6_flag ? AF_INET6 : AF_INET;
     const int socket_type = udp_flag ? SOCK_DGRAM : SOCK_STREAM;
@@ -2676,7 +2824,7 @@ SetupNet(
 
     // disable Nagle algorithm
     if (TRUE == flags.no_delay) {
-        if (SOCKET_ERROR == setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (PCHAR) &flags.no_delay, sizeof(flags.no_delay))) {
+        if (SOCKET_ERROR == setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, (PCHAR)&flags.no_delay, sizeof(flags.no_delay))) {
             err = ERROR_SETSOCKOPT;
             goto exit;
         }
@@ -2745,7 +2893,8 @@ SetupNet(
             sockAddrHv.ServiceId.Data4[5],
             sockAddrHv.ServiceId.Data4[6],
             sockAddrHv.ServiceId.Data4[7]);
-    } else {
+    }
+    else {
         err = GetHostInfoByName(receiver_name, port, udp_flag, &receiver_addr_info);
         if (NO_ERROR != err) {
             goto cleanup;
@@ -2755,8 +2904,8 @@ SetupNet(
 
     if (send_flag && bind_sender_flag) { // OACR needs send_flag to be used here as well
         err = bind(sd,
-                   (PSOCKADDR) sender_addr_info->ai_addr,
-                   (int) sender_addr_info->ai_addrlen);
+            (PSOCKADDR)sender_addr_info->ai_addr,
+            (int)sender_addr_info->ai_addrlen);
     }
 
     if (NO_ERROR != err) {
@@ -2779,10 +2928,11 @@ SetupNet(
 
             if (use_hvsocket_flag) {
                 err = connect(sd, (PSOCKADDR)&sockAddrHv, sizeof(sockAddrHv));
-            } else if (!udp_unconnected_flag) {
+            }
+            else if (!udp_unconnected_flag) {
                 err = connect(sd,
-                              (PSOCKADDR) receiver_addr_info->ai_addr,
-                              (int) receiver_addr_info->ai_addrlen);
+                    (PSOCKADDR)receiver_addr_info->ai_addr,
+                    (int)receiver_addr_info->ai_addrlen);
             }
 
             wait_result = (DWORD)ReleaseSemaphore(connect_semaphore, 1, NULL);
@@ -2806,14 +2956,16 @@ SetupNet(
 
             Sleep(SENDER_SLEEP_BETWEEN_RECONNECT);
         }
-    } else {
+    }
+    else {
 
         if (use_hvsocket_flag) {
             err = bind(sd, (PSOCKADDR)&sockAddrHv, sizeof(sockAddrHv));
-        } else {
+        }
+        else {
             err = bind(sd,
-                       (PSOCKADDR) receiver_addr_info->ai_addr,
-                       (int) receiver_addr_info->ai_addrlen);
+                (PSOCKADDR)receiver_addr_info->ai_addr,
+                (int)receiver_addr_info->ai_addrlen);
         }
 
         VMSG("bound to port %d\n", port);
@@ -2857,7 +3009,8 @@ exit:
 
     if (NO_ERROR == err) {
         VMSG("SetupNet complete on port %d\n", port);
-    } else {
+    }
+    else {
         PrintLocalError(__FUNCTION__, err);
         closesocket(sd); // don't care about errors
         sd = INVALID_SOCKET;
@@ -2869,7 +3022,7 @@ exit:
 BOOL
 SynchWithController(
     EVENTS_SYNCH * synch
-    )
+)
 {
     BOOL ret = TRUE;
     DWORD wait_result = 0;
@@ -2891,12 +3044,12 @@ SendReceiveToken(
     _In_z_ const PCHAR reveiver_name,
     _In_z_ const PCHAR sender_name,
     _In_ const int port
-    )
+)
 {
     int err = NO_ERROR;
     int ret = 0;
     int token_port = port + MAX_NUM_CONNECTIONS;
-    char buffer[] = {'X'};
+    char buffer[] = { 'X' };
     SOCKET socket = INVALID_SOCKET;
 
     if (flags.no_sync) {
@@ -2959,13 +3112,13 @@ exit:
 typedef struct _THROTTLING_DATA {
     long bytes_delta;
     DWORD prev_now;
-} THROTTLING_DATA, *PTHROTTLING_DATA;
+} THROTTLING_DATA, * PTHROTTLING_DATA;
 
 void
 ConsumeTimeToLowerSendThroughput(
     __in const DWORD bytes_sent,
     __inout PTHROTTLING_DATA const throttling_data
-    )
+)
 {
     DWORD now = GetTickCount();
     DWORD elapsed = now - throttling_data->prev_now;
@@ -2979,7 +3132,8 @@ ConsumeTimeToLowerSendThroughput(
     if (elapsed * throughput_Bpms <= bytes_sent || tmp_bytes_delta >= throttling_data->bytes_delta) {
         // No overflow.
         throttling_data->bytes_delta = tmp_bytes_delta;
-    } else {
+    }
+    else {
         throttling_data->bytes_delta = MAXLONG;
     }
 
@@ -2993,7 +3147,7 @@ ConsumeTimeToLowerSendThroughput(
 void
 BurnCpu(
     long cpu_burn
-    )
+)
 {
     unsigned long long x = 1;
     unsigned long long collatz_count = 0;
@@ -3017,7 +3171,8 @@ BurnCpu(
 
         if (tmp % 2 == 0) {
             tmp = tmp_even;
-        } else {
+        }
+        else {
             tmp = tmp_odd;
         }
 
@@ -3040,12 +3195,12 @@ BurnCpu(
 // 20 bytes (sizeof(ULONG) + sizeof(ULONGLONG)*2) (checked in VerifyArgs)
 BOOL
 AddPayloadToBuffer(
-    char * buffer,
+    char* buffer,
     const ULONG packet_num
-    )
+)
 {
     ULONGLONG temp_ulonglong = 0;
-    LARGE_INTEGER current_count = {0};
+    LARGE_INTEGER current_count = { 0 };
     ULONG temp_ulong = htonl(packet_num);
 
     memcpy(&buffer[0], &temp_ulong, sizeof(ULONG));
@@ -3068,16 +3223,16 @@ AddPayloadToBuffer(
 // This can be analyzed to find packet jitter and change in one way delay
 void
 OutputPayloadFromBuffer(
-    char * buffer,
+    char* buffer,
     const long buffer_length
-    )
+)
 {
     ULONG packet_num = 0;
     ULONGLONG send_count = 0;
-    ULONGLONG send_freq  = 0;
-    LARGE_INTEGER current_count = {0};
+    ULONGLONG send_freq = 0;
+    LARGE_INTEGER current_count = { 0 };
 
-    if(buffer_length >= (long)(sizeof(ULONG) + sizeof(ULONGLONG) + sizeof(ULONGLONG))) {
+    if (buffer_length >= (long)(sizeof(ULONG) + sizeof(ULONGLONG) + sizeof(ULONGLONG))) {
 
         QueryPerformanceCounter(&current_count);
 
@@ -3090,16 +3245,16 @@ OutputPayloadFromBuffer(
         memcpy(&send_freq, &buffer[sizeof(ULONG) + sizeof(ULONGLONG)], sizeof(ULONGLONG));
         send_freq = ntohll(send_freq);
 
-        fprintf(JitterFileHandle , "%lu,%llu,%llu,%llu,%llu\n",
-                packet_num, send_count, send_freq,
-                (ULONGLONG)current_count.QuadPart, (ULONGLONG)machine_frequency.QuadPart);
+        fprintf(JitterFileHandle, "%lu,%llu,%llu,%llu,%llu\n",
+            packet_num, send_count, send_freq,
+            (ULONGLONG)current_count.QuadPart, (ULONGLONG)machine_frequency.QuadPart);
     }
 }
 
 void
 DoQueryPerformanceCounter(
     LARGE_INTEGER * counter
-    )
+)
 {
     static volatile BOOL good_so_far = TRUE;
 
@@ -3145,12 +3300,12 @@ enum {
 int
 DoSendsReceives(
     const SOCKET socket,
-    __in_bcount(buffer_length) char * buffer,
+    __in_bcount(buffer_length) char* buffer,
     const long buffer_length,
     const long long max_num_ios,
     const long cpu_burn,
     __in PHP * php
-    )
+)
 {
     int err = NO_ERROR;
     int io_flags = 0;
@@ -3164,14 +3319,14 @@ DoSendsReceives(
     struct addrinfo* addr_info = NULL;
     LARGE_INTEGER time_perf_count_0;
     LARGE_INTEGER time_perf_count_1;
-    THROTTLING_DATA throttling_data = {0};
-    struct _timeb time0 = {0};
+    THROTTLING_DATA throttling_data = { 0 };
+    struct _timeb time0 = { 0 };
     BOOL time0_was_set = FALSE;
-    struct _timeb time1 = {0};
+    struct _timeb time1 = { 0 };
     BOOL time1_was_set = FALSE;
     ULONG packet_num = 0;
-    ESTATS_DATA test_begin_estats = {0};
-    ESTATS_DATA test_end_estats = {0};
+    ESTATS_DATA test_begin_estats = { 0 };
+    ESTATS_DATA test_end_estats = { 0 };
     PVOID tcp_row = NULL;
 
     time_perf_count_0.QuadPart = 0;
@@ -3183,9 +3338,10 @@ DoSendsReceives(
 
     if (flags.get_estats) {
         if (flags.use_ipv6_flag) {
-            tcp_row = (PMIB_TCP6ROW) malloc (sizeof(MIB_TCP6ROW));
-        } else {
-            tcp_row = (PMIB_TCPROW) malloc (sizeof(MIB_TCPROW));
+            tcp_row = (PMIB_TCP6ROW)malloc(sizeof(MIB_TCP6ROW));
+        }
+        else {
+            tcp_row = (PMIB_TCPROW)malloc(sizeof(MIB_TCPROW));
         }
         if (!EnableEstats(&socket, tcp_row)) {
             tcp_row = NULL;
@@ -3206,7 +3362,8 @@ DoSendsReceives(
         if (NULL == recv_buffer) {
             return ERROR_MEMORY_ALLOC;
         }
-    } else {
+    }
+    else {
         recv_buffer = buffer;
     }
 
@@ -3221,11 +3378,12 @@ DoSendsReceives(
             }
 
             ASSERT(NULL != addr_info);
-        } else {
+        }
+        else {
             // Allocate address information structure to hold sender address information retuned by
             // recvfrom() call. This sender information will be an input to sendto when in
             // roundtrip mode.
-            addr_info =  (struct addrinfo*) calloc(1, sizeof(struct addrinfo));
+            addr_info = (struct addrinfo*)calloc(1, sizeof(struct addrinfo));
 
             if (NULL == addr_info) {
                 return ERROR_MEMORY_ALLOC;
@@ -3233,7 +3391,8 @@ DoSendsReceives(
 
             if (flags.use_ipv6_flag) {
                 addr_info->ai_addrlen = sizeof(SOCKADDR_IN6);
-            } else {
+            }
+            else {
                 addr_info->ai_addrlen = sizeof(SOCKADDR_IN);
             }
 
@@ -3249,7 +3408,8 @@ DoSendsReceives(
             _ftime(&time0);
             GetEstats(tcp_row, &test_begin_estats);
             time0_was_set = TRUE;
-        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+        }
+        else if (time0_was_set && !start_recording_results && !time1_was_set) {
             _ftime(&time1);
             GetEstats(tcp_row, &test_end_estats);
             time1_was_set = TRUE;
@@ -3279,7 +3439,8 @@ DoSendsReceives(
             if (flags.udp_flag && (flags.roundtrip || flags.udp_unconnected_flag)) {
                 bytes_sent =
                     sendto(socket, buffer, buffer_length, io_flags, addr_info->ai_addr, (int)addr_info->ai_addrlen);
-            } else {
+            }
+            else {
                 bytes_sent = send(socket, buffer, buffer_length, io_flags);
             }
 
@@ -3287,7 +3448,8 @@ DoSendsReceives(
                 err = WSAGetLastError();
                 VMSG("ERROR: %s: send/sendto returned %d port %d thread %d\n", __FUNCTION__, err, php->port, php->index);
                 break;
-            } else if (0 == bytes_sent) {
+            }
+            else if (0 == bytes_sent) {
                 PrintError(__FUNCTION__, "Unexpected disconnect");
                 err = ERROR_SEND_RECV;
                 break;
@@ -3296,13 +3458,15 @@ DoSendsReceives(
             if (flags.roundtrip) {
                 state = S_RECV;
             }
-        } else {
+        }
+        else {
             ASSERT(state == S_RECV);
 
             if (flags.udp_flag && (flags.roundtrip || flags.udp_unconnected_flag)) {
                 bytes_received =
                     recvfrom(socket, recv_buffer, buffer_length, io_flags, addr_info->ai_addr, (int*)&addr_info->ai_addrlen);
-            } else {
+            }
+            else {
                 bytes_received = recv(socket, recv_buffer, buffer_length, io_flags);
             }
 
@@ -3310,7 +3474,8 @@ DoSendsReceives(
                 err = WSAGetLastError();
                 VMSG("WARNING: %s: recv/recvfrom returned %d port %d thread %d\n", __FUNCTION__, err, php->port, php->index);
                 break;
-            } else if (0 == bytes_received) {
+            }
+            else if (0 == bytes_received) {
                 PrintError(__FUNCTION__, "Unexpected disconnect");
                 err = ERROR_SEND_RECV;
                 break;
@@ -3350,9 +3515,9 @@ DoSendsReceives(
 
                 latency = latency > MAXLONG ? MAXLONG : latency;
 
-                local_perf_info->sum_latency += (long) latency;
-                local_perf_info->min_latency = min((long) latency, local_perf_info->min_latency);
-                local_perf_info->max_latency = max((long) latency, local_perf_info->max_latency);
+                local_perf_info->sum_latency += (long)latency;
+                local_perf_info->min_latency = min((long)latency, local_perf_info->min_latency);
+                local_perf_info->max_latency = max((long)latency, local_perf_info->max_latency);
             }
         }
 
@@ -3371,7 +3536,8 @@ DoSendsReceives(
 
     if (!time0_was_set) {
         DMSG("WARNING: expected time0 to be set\n");
-    } else if (!time1_was_set) {
+    }
+    else if (!time1_was_set) {
         if (flags.time_flag) {
             // We shouldn't be here too often.
             DMSG("WARNING: We missed a point where controller ends the test. port %d thread %d\n", php->port, php->index);
@@ -3406,11 +3572,11 @@ DoSendsReceives(
 
         local_perf_info->worker_time =
             time0_was_set && time1_was_set ?
-                MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
-                0;
+            MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
+            0;
         if (flags.get_estats) {
-            ASSERT ( NULL != local_perf_info->test_begin_estats);
-            ASSERT ( NULL != local_perf_info->test_end_estats);
+            ASSERT(NULL != local_perf_info->test_begin_estats);
+            ASSERT(NULL != local_perf_info->test_end_estats);
 
             memcpy(local_perf_info->test_begin_estats, &test_begin_estats, sizeof(ESTATS_DATA));
             memcpy(local_perf_info->test_end_estats, &test_end_estats, sizeof(ESTATS_DATA));
@@ -3424,7 +3590,7 @@ DoSendsReceives(
 int
 PostAsynchBuffer(
     PASYNCH_BUFFER buffer
-    )
+)
 {
     int err = NO_ERROR;
     BOOL was_io_successful = TRUE;
@@ -3442,20 +3608,20 @@ PostAsynchBuffer(
 
         err =
             flags.send_flag ?
-                WSASend(buffer->socket,
-                        buffer->wsa_buffer,
-                        buffer->length,
-                        NULL,
-                        wsa_io_flags,
-                        &(buffer->overlapped),
-                        NULL) :
-                WSARecv(buffer->socket,
-                        buffer->wsa_buffer,
-                        buffer->length,
-                        NULL,
-                        &wsa_io_flags,
-                        &(buffer->overlapped),
-                        NULL);
+            WSASend(buffer->socket,
+                buffer->wsa_buffer,
+                buffer->length,
+                NULL,
+                wsa_io_flags,
+                &(buffer->overlapped),
+                NULL) :
+            WSARecv(buffer->socket,
+                buffer->wsa_buffer,
+                buffer->length,
+                NULL,
+                &wsa_io_flags,
+                &(buffer->overlapped),
+                NULL);
 
         if (0 != err) {
             // WsaSend/Recv returns 0 or SOCKET_ERROR, to obtain real
@@ -3464,32 +3630,34 @@ PostAsynchBuffer(
 
             was_io_successful = FALSE;
         }
-    } else if (flags.tp_flag) {
+    }
+    else if (flags.tp_flag) {
         ASSERT(buffer->packets);
         ASSERT(flags.send_flag);
 
         was_io_successful =
             TransmitPackets(buffer->socket,
-                            buffer->packets,
-                            buffer->length,
-                            0,
-                            &(buffer->overlapped),
-                            TF_USE_KERNEL_APC);
-    } else {
+                buffer->packets,
+                buffer->length,
+                0,
+                &(buffer->overlapped),
+                TF_USE_KERNEL_APC);
+    }
+    else {
         ASSERT(buffer->buffer);
 
         was_io_successful =
             flags.send_flag ?
-                WriteFile((HANDLE) buffer->socket,
-                          buffer->buffer,
-                          buffer->length,
-                          NULL,
-                          &(buffer->overlapped)) :
-                ReadFile((HANDLE) buffer->socket,
-                         buffer->buffer,
-                         buffer->length,
-                         NULL,
-                         &(buffer->overlapped));
+            WriteFile((HANDLE)buffer->socket,
+                buffer->buffer,
+                buffer->length,
+                NULL,
+                &(buffer->overlapped)) :
+            ReadFile((HANDLE)buffer->socket,
+                buffer->buffer,
+                buffer->length,
+                NULL,
+                &(buffer->overlapped));
     }
 
     if (!was_io_successful) {
@@ -3499,7 +3667,8 @@ PostAsynchBuffer(
         err = GetLastError();
         if (ERROR_IO_PENDING == err) {
             err = 0;
-        } else {
+        }
+        else {
             VMSG("WARNING: %s: IO routine returned %d\n", __FUNCTION__, err);
         }
     }
@@ -3513,65 +3682,70 @@ int GetCompletedIO(
     _In_reads_(async_count + 1) HANDLE * events,
     _In_reads_(async_count) PASYNCH_BUFFER const buffers,
     _Out_ PASYNCH_BUFFER * buffer_ptr,
-    _Out_ long * const bytes_sent_received_ptr
-    )
+    _Out_ long* const bytes_sent_received_ptr
+)
 {
     int err = NO_ERROR;
     int wait_count = 0;
     DWORD wait_result = 0;
     ULONG_PTR completion_key = 0;
-    OVERLAPPED * overlap_ptr;
+    OVERLAPPED* overlap_ptr;
 
     *buffer_ptr = NULL;
 
     while (wait_count < MAX_ASYNCH_IO_WAIT_COUNT) {
         if (flags.use_io_compl_ports) {
             if (!GetQueuedCompletionStatus(io_compl_port,
-                                           (LPDWORD) bytes_sent_received_ptr,
-                                           &completion_key, &overlap_ptr,
-                                           wait_timeout_milliseconds)) {
+                (LPDWORD)bytes_sent_received_ptr,
+                &completion_key, &overlap_ptr,
+                wait_timeout_milliseconds)) {
                 err = GetLastError();
                 VMSG("WARNING: %s: GetQueuedCompletionStatus returned %d\n",
                     __FUNCTION__, err);
-            } else {
-                *buffer_ptr = (PASYNCH_BUFFER) overlap_ptr;
             }
-        } else {
+            else {
+                *buffer_ptr = (PASYNCH_BUFFER)overlap_ptr;
+            }
+        }
+        else {
             // WSAWaitForMultipleEvents works basically the same.
             wait_result = WaitForMultipleObjects(async_count + 1,
-                                                 events,
-                                                 FALSE,
-                                                 wait_timeout_milliseconds);
+                events,
+                FALSE,
+                wait_timeout_milliseconds);
 
-            if (WAIT_OBJECT_0 + (DWORD) async_count <= wait_result) {
+            if (WAIT_OBJECT_0 + (DWORD)async_count <= wait_result) {
 
-                if (WAIT_OBJECT_0 + (DWORD) async_count == wait_result) {
+                if (WAIT_OBJECT_0 + (DWORD)async_count == wait_result) {
                     //
                     // Controller signalled event to quit all I/Os
                     //
                     VMSG("Worker: Controller timed out, I waited for IO.\n")
 
-                    err = ERROR_WAIT_ABORTED_BY_CONTROLLER;
-                } else if (WAIT_TIMEOUT == wait_result) {
+                        err = ERROR_WAIT_ABORTED_BY_CONTROLLER;
+                }
+                else if (WAIT_TIMEOUT == wait_result) {
                     //
                     // We're waiting for I/O to complete longer than expected
                     //
                     err = WAIT_TIMEOUT;
-                } else {
+                }
+                else {
                     //
                     // Something bad happened
                     //
                     PrintError(__FUNCTION__, "WaitForMultipleObjects returned an unexpected value");
                     err = ERROR_WAIT;
                 }
-            } else {
+            }
+            else {
                 //
                 // We received an I/O
                 //
                 BOOL was_io_successful;
 
                 // WAIT_OBJECT_0 <= wait_result   <-- Always true
-                ASSERT(wait_result < WAIT_OBJECT_0 + (DWORD) async_count);
+                ASSERT(wait_result < WAIT_OBJECT_0 + (DWORD)async_count);
 
                 *buffer_ptr = &(buffers[(long)(wait_result - WAIT_OBJECT_0)]);
 
@@ -3583,16 +3757,17 @@ int GetCompletedIO(
 
                     was_io_successful =
                         WSAGetOverlappedResult((*buffer_ptr)->socket,
-                                               &((*buffer_ptr)->overlapped),
-                                               (LPDWORD) bytes_sent_received_ptr,
-                                               FALSE,
-                                               (LPDWORD) &finish_flags);
-                } else {
+                            &((*buffer_ptr)->overlapped),
+                            (LPDWORD)bytes_sent_received_ptr,
+                            FALSE,
+                            (LPDWORD)&finish_flags);
+                }
+                else {
                     was_io_successful =
-                        GetOverlappedResult((HANDLE) (*buffer_ptr)->socket,
-                                            &((*buffer_ptr)->overlapped),
-                                            (LPDWORD) bytes_sent_received_ptr,
-                                            FALSE);
+                        GetOverlappedResult((HANDLE)(*buffer_ptr)->socket,
+                            &((*buffer_ptr)->overlapped),
+                            (LPDWORD)bytes_sent_received_ptr,
+                            FALSE);
                 }
 
                 if (!was_io_successful) {
@@ -3610,7 +3785,8 @@ int GetCompletedIO(
                 (wait_count + 1) * wait_timeout_milliseconds / 1000);
 
             ++wait_count;
-        } else {
+        }
+        else {
             //
             // Either we successfully got an I/O, controller timed out or an error occured
             //
@@ -3629,7 +3805,7 @@ DoAsynchSendsReceives(
     const long cpu_burn,
     const int index,
     const HANDLE abort_ios
-    )
+)
 {
     int err = NO_ERROR;
     long outstanding_ios = 0;
@@ -3639,16 +3815,16 @@ DoAsynchSendsReceives(
     PTHREAD_PERF_INFO local_perf_info = NULL;
     PASYNCH_BUFFER buffer_ptr = buffers;
     char* data_buffer = NULL;
-    THROTTLING_DATA throttling_data = {0};
+    THROTTLING_DATA throttling_data = { 0 };
     // for WaitForMultipleObjects function, stores same event as OVERLAPPED
     // structure (hEvent)
-    HANDLE * events = NULL;
-    struct _timeb time0 = {0};
+    HANDLE* events = NULL;
+    struct _timeb time0 = { 0 };
     BOOL time0_was_set = FALSE;
-    struct _timeb time1 = {0};
+    struct _timeb time1 = { 0 };
     BOOL time1_was_set = FALSE;
-    ESTATS_DATA test_begin_estats = {0};
-    ESTATS_DATA test_end_estats = {0};
+    ESTATS_DATA test_begin_estats = { 0 };
+    ESTATS_DATA test_end_estats = { 0 };
     PVOID tcp_row = NULL;
 
     ASSERT(NULL != buffer_ptr);
@@ -3656,7 +3832,7 @@ DoAsynchSendsReceives(
     if (!flags.use_io_compl_ports) {
         int i = 0;
 
-        events = (HANDLE *) calloc(async_count + 1, sizeof(HANDLE));
+        events = (HANDLE*)calloc(async_count + 1, sizeof(HANDLE));
         if (NULL == events) {
             err = ERROR_MEMORY_ALLOC;
             goto exit;
@@ -3671,9 +3847,10 @@ DoAsynchSendsReceives(
 
     if (flags.get_estats) {
         if (flags.use_ipv6_flag) {
-            tcp_row = (PMIB_TCP6ROW) malloc (sizeof(MIB_TCP6ROW));
-        } else {
-            tcp_row = (PMIB_TCPROW) malloc (sizeof(MIB_TCPROW));
+            tcp_row = (PMIB_TCP6ROW)malloc(sizeof(MIB_TCP6ROW));
+        }
+        else {
+            tcp_row = (PMIB_TCPROW)malloc(sizeof(MIB_TCPROW));
         }
         if (!EnableEstats(&buffers[0].socket, tcp_row)) {
             tcp_row = NULL;
@@ -3684,7 +3861,7 @@ DoAsynchSendsReceives(
         throttling_data.prev_now = GetTickCount();
     }
 
-    while(num_ios < max_num_ios) {
+    while (num_ios < max_num_ios) {
         if (start_recording_results && !time0_was_set) {
             _ftime(&time0);
             GetEstats(tcp_row, &test_begin_estats);
@@ -3713,13 +3890,15 @@ DoAsynchSendsReceives(
                 // Something bad happened.
                 //
                 break;
-            } else {
+            }
+            else {
                 err = 0;
             }
 
             ++outstanding_ios;
             ++buffer_ptr;
-        } else {
+        }
+        else {
             ASSERT(0 < outstanding_ios);
 
             err = GetCompletedIO(io_compl_port, events, buffers, &buffer_ptr, &bytes_sent_received);
@@ -3739,9 +3918,11 @@ DoAsynchSendsReceives(
             if (flags.verify_data_flag) {
                 if (flags.wsa_flag) {
                     data_buffer = buffer_ptr->wsa_buffer->buf;
-                } else if (flags.tp_flag) {
+                }
+                else if (flags.tp_flag) {
                     data_buffer = buffer_ptr->packets->pBuffer;
-                } else {
+                }
+                else {
                     data_buffer = buffer_ptr->buffer;
                 }
 
@@ -3771,10 +3952,10 @@ DoAsynchSendsReceives(
 
                     latency = (latency > MAXLONG ? MAXLONG : latency);
 
-                    local_perf_info->sum_latency += (long) latency;
+                    local_perf_info->sum_latency += (long)latency;
 
-                    local_perf_info->min_latency = min((long) latency, local_perf_info->min_latency);
-                    local_perf_info->max_latency = max((long) latency, local_perf_info->max_latency);
+                    local_perf_info->min_latency = min((long)latency, local_perf_info->min_latency);
+                    local_perf_info->max_latency = max((long)latency, local_perf_info->max_latency);
                 }
             }
 
@@ -3816,7 +3997,8 @@ DoAsynchSendsReceives(
     if (NO_ERROR != err) {
         PrintLocalError(__FUNCTION__, err);
         err = ERROR_SEND_RECV;
-    } else if (0 < outstanding_ios){
+    }
+    else if (0 < outstanding_ios) {
         err = ERROR_OUTSTANDING_IOS_PENDING;
     }
 
@@ -3829,11 +4011,11 @@ DoAsynchSendsReceives(
 
         local_perf_info->worker_time =
             time0_was_set && time1_was_set ?
-                MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
-                0;
+            MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
+            0;
         if (flags.get_estats) {
-            ASSERT ( NULL != local_perf_info->test_begin_estats);
-            ASSERT ( NULL != local_perf_info->test_end_estats);
+            ASSERT(NULL != local_perf_info->test_begin_estats);
+            ASSERT(NULL != local_perf_info->test_end_estats);
 
             memcpy(local_perf_info->test_begin_estats, &test_begin_estats, sizeof(ESTATS_DATA));
             memcpy(local_perf_info->test_end_estats, &test_end_estats, sizeof(ESTATS_DATA));
@@ -3854,9 +4036,9 @@ exit:
 PASYNCH_BUFFER
 AllocateAsynchBuffers(
     void
-    )
+)
 {
-    char * temp_buffer = NULL;
+    char* temp_buffer = NULL;
     BOOL success = FALSE;
 
     //
@@ -3881,7 +4063,7 @@ AllocateAsynchBuffers(
             //
             // Fill packets
             //
-            asynch_buffers[i].packets = (TRANSMIT_PACKETS_ELEMENT *) calloc(
+            asynch_buffers[i].packets = (TRANSMIT_PACKETS_ELEMENT*)calloc(
                 send_count, sizeof(TRANSMIT_PACKETS_ELEMENT));
 
             if (NULL == asynch_buffers[i].packets) {
@@ -3891,11 +4073,12 @@ AllocateAsynchBuffers(
             asynch_buffers[i].length = send_count;
 
             for (int j = 0; j < send_count; ++j) {
-                temp_buffer = (char *) calloc(buffers_length, sizeof(char));
+                temp_buffer = (char*)calloc(buffers_length, sizeof(char));
 
                 if (NULL == temp_buffer) {
                     goto exit;
-                } else {
+                }
+                else {
                     memset(temp_buffer, 'A', buffers_length * sizeof(char));
 
                     asynch_buffers[i].packets[j].dwElFlags = TP_ELEMENT_MEMORY | TP_ELEMENT_EOP;
@@ -3903,21 +4086,22 @@ AllocateAsynchBuffers(
                     asynch_buffers[i].packets[j].cLength = buffers_length * sizeof(char);
                 }
             }
-        } else if (flags.wsa_flag) {
+        }
+        else if (flags.wsa_flag) {
             //
             // Fill wsa_buffer
             //
             // TODO: add more than one buffer
             int wsa_buffers_count = 1;
 
-            asynch_buffers[i].wsa_buffer = (WSABUF *) calloc(wsa_buffers_count, sizeof(WSABUF));
+            asynch_buffers[i].wsa_buffer = (WSABUF*)calloc(wsa_buffers_count, sizeof(WSABUF));
 
             if (NULL == asynch_buffers[i].wsa_buffer) {
                 goto exit;
             }
 
             for (int j = 0; j < wsa_buffers_count; ++j) {
-                temp_buffer = (char *) calloc(buffers_length, sizeof(char));
+                temp_buffer = (char*)calloc(buffers_length, sizeof(char));
 
                 if (NULL == temp_buffer) {
                     goto exit;
@@ -3930,11 +4114,12 @@ AllocateAsynchBuffers(
             }
 
             asynch_buffers[i].length = wsa_buffers_count;
-        } else {
+        }
+        else {
             //
             // Fill buffer.
             //
-            asynch_buffers[i].buffer = (char *) calloc(buffers_length, sizeof(char));
+            asynch_buffers[i].buffer = (char*)calloc(buffers_length, sizeof(char));
 
             if (NULL == asynch_buffers[i].buffer) {
                 goto exit;
@@ -3956,7 +4141,7 @@ AllocateAsynchBuffers(
         for (int i = 0; i < async_count; ++i) {
             ASSERT(asynch_buffers[i].wsa_buffer);
             ASSERT(asynch_buffers[i].wsa_buffer->buf);
-            ASSERT(asynch_buffers[i].wsa_buffer->len == ((ULONG) buffers_length));
+            ASSERT(asynch_buffers[i].wsa_buffer->len == ((ULONG)buffers_length));
         }
     }
 
@@ -3977,10 +4162,10 @@ exit:
 void
 StartSenderReceiver(
     __in PHP * php
-    )
+)
 {
     int err = NO_ERROR;
-    SOCKET sd = {0};
+    SOCKET sd = { 0 };
     QOS_FLOWID qos_flow_id = 0;
     EVENTS_SYNCH ready;
     EVENTS_SYNCH synched;
@@ -3990,28 +4175,49 @@ StartSenderReceiver(
     VMSG("StartSenderReceiver start thread %d port %d\n", php->index, php->port);
 
     if (php->proc != NO_HARD_AFFINITY) {
-        // Note SetThreadAffinityMask requires the processor to be in the process's kgroup.
-        if (0 == SetThreadAffinityMask(GetCurrentThread(),
-                                       ((KAFFINITY)(1ULL << php->proc)))) {
-            PrintThreadError(php->index,
-                             "StartSenderReceiver",
-                             "SetThreadAffinityMask failed");
-            goto exit;
+
+        if (flags.group_aware)
+        {
+            GROUP_AFFINITY group_affinity;
+            group_affinity.Mask = (KAFFINITY)1 << php->proc;
+            group_affinity.Group = php->group;
+            memset(group_affinity.Reserved, 0, sizeof(WORD) * 3);
+
+            if (0 == SetThreadGroupAffinity(GetCurrentThread(), &group_affinity, NULL))
+            {
+                PrintThreadError(php->index, "StartSenderReceiver", "SetThreadGroupAffinity failed");
+                goto exit;
+            }
+
         }
-    } else if (node_affinity >= 0) {
+        else
+        {
+            // Note SetThreadAffinityMask requires the processor to be in the process's kgroup.
+            if (0 == SetThreadAffinityMask(GetCurrentThread(),
+                ((KAFFINITY)(1ULL << php->proc)))) {
+                PrintThreadError(php->index,
+                    "StartSenderReceiver",
+                    "SetThreadAffinityMask failed");
+                goto exit;
+            }
+        }
+
+
+    }
+    else if (node_affinity >= 0) {
         GROUP_AFFINITY group;
 
         if (!GetNumaNodeProcessorMaskEx((USHORT)node_affinity, &group)) {
             PrintThreadError(php->index,
-                             "StartSenderReceiver",
-                             "GetNumaNodeProcessorMaskEx failed");
+                "StartSenderReceiver",
+                "GetNumaNodeProcessorMaskEx failed");
             goto exit;
         }
 
         if (!SetThreadGroupAffinity(GetCurrentThread(), &group, NULL)) {
             PrintThreadError(php->index,
-                             "StartSenderReceiver",
-                             "SetThreadGroupAffinity failed");
+                "StartSenderReceiver",
+                "SetThreadGroupAffinity failed");
             goto exit;
         }
     }
@@ -4021,19 +4227,21 @@ StartSenderReceiver(
         // Get data port from receiver.
         //
         SOCKET socket = SetupNet(php->receiver_name, php->sender_name, php->port,
-                                 flags.use_hvsocket_flag, FALSE, TRUE, FALSE, FALSE,
-                                 FALSE, flags.bind_sender_flag, 0, FALSE);
+            flags.use_hvsocket_flag, FALSE, TRUE, FALSE, FALSE,
+            FALSE, flags.bind_sender_flag, 0, FALSE);
         if (INVALID_SOCKET != socket) {
             VMSG("getting data port from receiver\n");
             int ret = recv(socket, (char*)&php->port, sizeof(php->port), MSG_WAITALL);
             if (SOCKET_ERROR == ret) {
                 PrintLocalError(__FUNCTION__, GetLastError());
-            } else if (sizeof(php->port) != ret) {
+            }
+            else if (sizeof(php->port) != ret) {
                 PrintError(__FUNCTION__, "Could not transfer expected bytes");
                 err = ERROR_SEND_RECEIVE_DATA_PORT;
             }
             closesocket(socket);
-        } else {
+        }
+        else {
             err = ERROR_SEND_RECEIVE_DATA_PORT;
         }
         if (NO_ERROR != err) {
@@ -4050,9 +4258,9 @@ StartSenderReceiver(
     synched.start_event = php->start_test;
 
     sd = SetupNet(php->receiver_name, php->sender_name, php->port,
-                  flags.use_hvsocket_flag, flags.use_ipv6_flag,
-                  flags.send_flag, flags.udp_flag, flags.udp_unconnected_flag,
-                  flags.roundtrip, flags.bind_sender_flag, 0, TRUE);
+        flags.use_hvsocket_flag, flags.use_ipv6_flag,
+        flags.send_flag, flags.udp_flag, flags.udp_unconnected_flag,
+        flags.roundtrip, flags.bind_sender_flag, 0, TRUE);
 
     if (INVALID_SOCKET == sd) {
         err = ERROR_SETUP_NET;
@@ -4061,7 +4269,7 @@ StartSenderReceiver(
     // Add sending sockets to QOS Flow
     if (flags.qos_flag && flags.send_flag) {
         if (FALSE == lpQOSAddSocketToFlow(qos_handle, sd, NULL, qos_priority,
-                                       QOS_NON_ADAPTIVE_FLOW, &qos_flow_id)) {
+            QOS_NON_ADAPTIVE_FLOW, &qos_flow_id)) {
             err = ERROR_ADDING_SOCKET_TO_QOS;
             goto exit;
         }
@@ -4071,7 +4279,7 @@ StartSenderReceiver(
         //
         // Synchronous
         //
-        char * buffer = NULL;
+        char* buffer = NULL;
 
         //
         // VirtualAlloc is expected to allocate memory near the current processor.
@@ -4093,16 +4301,18 @@ StartSenderReceiver(
             NO_ERROR != SendReceiveToken(php->receiver_name, php->sender_name, php->port) ||
             !SynchWithController(&synched)) {
             err = ERROR_SYNCH;
-        } else {
+        }
+        else {
             err = DoSendsReceives(sd,
-                                  buffer,
-                                  buffers_length,
-                                  num_buffers_to_send,
-                                  cpu_burn,
-                                  php);
+                buffer,
+                buffers_length,
+                num_buffers_to_send,
+                cpu_burn,
+                php);
         }
         VirtualFree(buffer, 0, MEM_RELEASE);
-    } else {
+    }
+    else {
         //
         // Asynchronous
         //
@@ -4118,7 +4328,7 @@ StartSenderReceiver(
         if (flags.use_io_compl_ports) {
 
             ASSERT(NULL != php->io_compl_port);
-            if (NULL == CreateIoCompletionPort((HANDLE) sd, php->io_compl_port, (ULONG_PTR) 0, 0)) {
+            if (NULL == CreateIoCompletionPort((HANDLE)sd, php->io_compl_port, (ULONG_PTR)0, 0)) {
                 err = ERROR_CREATE_IO_COML_PORT;
                 goto exit;
             }
@@ -4127,15 +4337,15 @@ StartSenderReceiver(
         if (flags.tp_flag) {
             DWORD dword = 0;
             if (SOCKET_ERROR ==
-                    WSAIoctl(sd,
-                             SIO_GET_EXTENSION_FUNCTION_POINTER,
-                             &TransmitPacketsGuid,
-                             sizeof(TransmitPacketsGuid),
-                             &TransmitPackets,
-                             sizeof(TransmitPackets),
-                             &dword,
-                             NULL,
-                             NULL)) {
+                WSAIoctl(sd,
+                    SIO_GET_EXTENSION_FUNCTION_POINTER,
+                    &TransmitPacketsGuid,
+                    sizeof(TransmitPacketsGuid),
+                    &TransmitPackets,
+                    sizeof(TransmitPackets),
+                    &dword,
+                    NULL,
+                    NULL)) {
                 err = ERROR_SETTING_TRANSMIT_PACKETS;
                 goto exit;
             }
@@ -4149,13 +4359,14 @@ StartSenderReceiver(
             NO_ERROR != SendReceiveToken(php->receiver_name, php->sender_name, php->port) ||
             !SynchWithController(&synched)) {
             err = ERROR_SYNCH;
-        } else {
+        }
+        else {
             err = DoAsynchSendsReceives(php->io_compl_port,
-                                        asynch_buffers,
-                                        num_buffers_to_send,
-                                        cpu_burn,
-                                        php->index,
-                                        php->abort_ios);
+                asynch_buffers,
+                num_buffers_to_send,
+                cpu_burn,
+                php->index,
+                php->abort_ios);
         }
     }
 
@@ -4171,9 +4382,9 @@ exit:
         PrintThreadLocalError(php->index, "StartSenderReceiver", err);
     }
 
-    if ((flags.qos_flag)        &&
-        (0 != qos_flow_id)      &&
-        (FALSE == lpQOSRemoveSocketFromFlow(qos_handle, sd, qos_flow_id, 0)) ) {
+    if ((flags.qos_flag) &&
+        (0 != qos_flow_id) &&
+        (FALSE == lpQOSRemoveSocketFromFlow(qos_handle, sd, qos_flow_id, 0))) {
         PrintThreadError(php->index, "StartSenderReceiver", "QOSRemoveSocketFromFlow");
     }
 
@@ -4194,21 +4405,21 @@ exit:
 BOOL
 AllocateSamplingBuffers(
     void
-    )
+)
 {
     BOOL ret = TRUE;
 
     ASSERT(num_samples > 0);
     ASSERT(num_processors > 0);
 
-    perf_info_samples = (PPERF_INFO) calloc(num_samples, sizeof(PERF_INFO));
+    perf_info_samples = (PPERF_INFO)calloc(num_samples, sizeof(PERF_INFO));
     if (NULL == perf_info_samples) {
         ret = FALSE;
         goto exit;
     }
 
     for (int i = 0; i < num_samples; ++i) {
-        perf_info_samples[i].threads_perf_info = (PTHREAD_PERF_INFO) calloc(num_threads_total, sizeof(THREAD_PERF_INFO));
+        perf_info_samples[i].threads_perf_info = (PTHREAD_PERF_INFO)calloc(num_threads_total, sizeof(THREAD_PERF_INFO));
         if (NULL == perf_info_samples[i].threads_perf_info) {
             ret = FALSE;
             goto exit;
@@ -4224,8 +4435,8 @@ AllocateSamplingBuffers(
                 run_time);
 
         if (flags.cpu_from_idle_flag) {
-            perf_info_samples[i].begin_cui = (PCPU_UTIL_INFO) malloc(sizeof(CPU_UTIL_INFO));
-            perf_info_samples[i].end_cui = (PCPU_UTIL_INFO) malloc(sizeof(CPU_UTIL_INFO));
+            perf_info_samples[i].begin_cui = (PCPU_UTIL_INFO)malloc(sizeof(CPU_UTIL_INFO));
+            perf_info_samples[i].end_cui = (PCPU_UTIL_INFO)malloc(sizeof(CPU_UTIL_INFO));
 
             if (NULL == perf_info_samples[i].begin_cui ||
                 NULL == perf_info_samples[i].end_cui) {
@@ -4236,8 +4447,8 @@ AllocateSamplingBuffers(
             memset(perf_info_samples[i].begin_cui, 0, sizeof(CPU_UTIL_INFO));
             memset(perf_info_samples[i].end_cui, 0, sizeof(CPU_UTIL_INFO));
 
-            perf_info_samples[i].begin_cui->processor_idle_cycle_time = (PULONG64) calloc(num_processors, sizeof(ULONG64));
-            perf_info_samples[i].end_cui->processor_idle_cycle_time = (PULONG64) calloc(num_processors, sizeof(ULONG64));
+            perf_info_samples[i].begin_cui->processor_idle_cycle_time = (PULONG64)calloc(num_processors, sizeof(ULONG64));
+            perf_info_samples[i].end_cui->processor_idle_cycle_time = (PULONG64)calloc(num_processors, sizeof(ULONG64));
 
             if (NULL == perf_info_samples[i].begin_cui->processor_idle_cycle_time ||
                 NULL == perf_info_samples[i].end_cui->processor_idle_cycle_time) {
@@ -4268,8 +4479,8 @@ AllocateSamplingBuffers(
         if (flags.get_estats) {
             for (int j = 0; j < num_threads_total; ++j) {
 
-                perf_info_samples[i].threads_perf_info[j].test_begin_estats = (PESTATS_DATA) malloc(sizeof(ESTATS_DATA));
-                perf_info_samples[i].threads_perf_info[j].test_end_estats = (PESTATS_DATA) malloc(sizeof(ESTATS_DATA));
+                perf_info_samples[i].threads_perf_info[j].test_begin_estats = (PESTATS_DATA)malloc(sizeof(ESTATS_DATA));
+                perf_info_samples[i].threads_perf_info[j].test_end_estats = (PESTATS_DATA)malloc(sizeof(ESTATS_DATA));
 
                 if (NULL == perf_info_samples[i].threads_perf_info[j].test_begin_estats ||
                     NULL == perf_info_samples[i].threads_perf_info[j].test_end_estats) {
@@ -4288,9 +4499,9 @@ exit:
 
 BOOL
 WaitForWorkerThreads(
-    HANDLE* threads,
+    HANDLE * threads,
     DWORD milliseconds
-    )
+)
 {
     PHANDLE thread_set = threads;
     DWORD wait_result = 0;
@@ -4300,7 +4511,7 @@ WaitForWorkerThreads(
     do {
         threads_to_process =
             (threads_left > MAXIMUM_WAIT_OBJECTS)
-                ? MAXIMUM_WAIT_OBJECTS : threads_left;
+            ? MAXIMUM_WAIT_OBJECTS : threads_left;
 
         wait_result = WaitForMultipleObjects(threads_to_process, thread_set, TRUE, milliseconds);
 
@@ -4325,7 +4536,7 @@ WaitForWorkerThreads(
 int
 DoWork(
     void
-    )
+)
 {
     int err = NO_ERROR;
     int i = 0;
@@ -4378,7 +4589,8 @@ DoWork(
             int ret = send(socket, (char*)&port_buffer, sizeof(port_buffer), 0);
             if (SOCKET_ERROR == ret) {
                 PrintLocalError(__FUNCTION__, GetLastError());
-            } else if (sizeof(port) != ret) {
+            }
+            else if (sizeof(port) != ret) {
                 PrintError(__FUNCTION__, "Could not transfer expected bytes");
                 err = ERROR_SEND_RECEIVE_DATA_PORT;
             }
@@ -4397,10 +4609,10 @@ DoWork(
     //
     // Do memory allocations
     //
-    threads_ready = (HANDLE *) calloc(num_threads_total, sizeof(HANDLE));
-    threads_synched = (HANDLE *) calloc(num_threads_total, sizeof(HANDLE));
-    threads_finished = (HANDLE *) calloc(num_threads_total, sizeof(HANDLE));
-    threads_handles = (HANDLE *) calloc(num_threads_total, sizeof(HANDLE));
+    threads_ready = (HANDLE*)calloc(num_threads_total, sizeof(HANDLE));
+    threads_synched = (HANDLE*)calloc(num_threads_total, sizeof(HANDLE));
+    threads_finished = (HANDLE*)calloc(num_threads_total, sizeof(HANDLE));
+    threads_handles = (HANDLE*)calloc(num_threads_total, sizeof(HANDLE));
     if (NULL == threads_ready || NULL == threads_synched || NULL == threads_finished || NULL == threads_handles) {
         err = ERROR_MEMORY_ALLOC;
         goto cleanup;
@@ -4411,7 +4623,7 @@ DoWork(
         // Create I/O completion port
         //
         ASSERT(max_active_threads >= 0);
-        io_compl_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, (ULONG_PTR) 0, max_active_threads);
+        io_compl_port = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, (ULONG_PTR)0, max_active_threads);
         if (NULL == io_compl_port) {
             err = ERROR_CREATE_IO_COML_PORT;
             goto exit;
@@ -4442,17 +4654,18 @@ DoWork(
 
     for (i = 0; i < num_mappings; ++i) {
         SetupThreads(maps[i].threads,
-                     index,
-                     maps[i].proc,
-                     maps[i].receiver_name,
-                     io_compl_port,
-                     send_token,
-                     start_test,
-                     abort_ios,
-                     threads_ready,
-                     threads_synched,
-                     threads_finished,
-                     (LPTHREAD_START_ROUTINE)&StartSenderReceiver);
+            index,
+            maps[i].proc,
+            maps[i].group,
+            maps[i].receiver_name,
+            io_compl_port,
+            send_token,
+            start_test,
+            abort_ios,
+            threads_ready,
+            threads_synched,
+            threads_finished,
+            (LPTHREAD_START_ROUTINE)&StartSenderReceiver);
         index += maps[i].threads;
     }
 
@@ -4467,10 +4680,10 @@ DoWork(
 
     VMSG("All threads ready!\n")
 
-    if (!SetEvent(send_token)) {
-        err = ERROR_SET_EVENT;
-        goto exit; // don't cleanup since some threads might be using that memory
-    }
+        if (!SetEvent(send_token)) {
+            err = ERROR_SET_EVENT;
+            goto exit; // don't cleanup since some threads might be using that memory
+        }
 
     if (!WaitForWorkerThreads(threads_synched, INFINITE)) {
         PrintError(__FUNCTION__, "WaitForWorkerThreads(threads_synched) returned an unexpected value");
@@ -4517,7 +4730,7 @@ DoWork(
                 goto exit; // don't cleanup since some threads might be using that memory
             }
 
-            Sleep((DWORD) perf_info->expected_run_time);
+            Sleep((DWORD)perf_info->expected_run_time);
 
             if (!GetCpuStatistics(perf_info->end_sppi, perf_info->end_sii, perf_info->end_cui)) {
                 err = ERROR_GET_CPU_STATISTICS;
@@ -4559,7 +4772,8 @@ DoWork(
             // don't indicate error so we can still report statistics
             goto exit; // don't cleanup since some threads might be using that memory
         }
-    } else {
+    }
+    else {
 
         perf_info = &perf_info_samples[0];
 
@@ -4638,7 +4852,7 @@ double
 DivAndHandleZero(
     double dividend,
     double divisor
-    )
+)
 {
     return (divisor > 0.0 || divisor < 0.0 ? dividend / divisor : 0.0);
 }
@@ -4647,7 +4861,7 @@ double
 GetTimePercent(
     long long time,
     double total_time
-    )
+)
 {
     // time is measured in 1/10^7 s while total_time is in s
     return DivAndHandleZero(100 * (double)time / 10000000, total_time);
@@ -4656,7 +4870,7 @@ GetTimePercent(
 double
 BytesToKBytes(
     double bytes
-    )
+)
 {
     return bytes / 1024;
 }
@@ -4664,7 +4878,7 @@ BytesToKBytes(
 double
 BytesToMBytes(
     double bytes
-    )
+)
 {
     return bytes / (1024 * 1024);
 }
@@ -4672,7 +4886,7 @@ BytesToMBytes(
 double
 BytesToMbits(
     double bytes
-    )
+)
 {
     return bytes * 8 / 1000000;
 }
@@ -4680,7 +4894,7 @@ BytesToMbits(
 DWORD
 MhzToHz(
     DWORD frequency
-    )
+)
 {
     return frequency * 1000000;
 }
@@ -4688,7 +4902,7 @@ MhzToHz(
 double
 PrcntToFraction(
     double prcnt
-    )
+)
 {
     return prcnt / 100.0;
 }
@@ -4697,7 +4911,7 @@ double
 LatencyToNs(
     double latency,
     double frequency
-    )
+)
 {
     return 1000000000.0 * DivAndHandleZero(latency, frequency);
 }
@@ -4705,25 +4919,25 @@ LatencyToNs(
 double
 GetTestTime(
     void
-    )
+)
 {
-    return perf_info->actual_run_time / ((double) MICROSEC_TO_SEC);
+    return perf_info->actual_run_time / ((double)MICROSEC_TO_SEC);
 }
 
 double
 GetWorkerTime(
     long i
-    )
+)
 {
     return flags.sampling ?
         GetTestTime() :
-        perf_info->threads_perf_info[i].worker_time / ((double) MS2S);
+        perf_info->threads_perf_info[i].worker_time / ((double)MS2S);
 }
 
 void
 PrintOutput(
     void
-    )
+)
 {
     int i = 0;
     int packets_retransmitted = 0;
@@ -4749,14 +4963,14 @@ PrintOutput(
     double total_num_ios = 0.0;
     double threads_average_bytes_per_compl = 0.0;
     double frames_count = 0.0;
-    TCHAR computer_name[MAX_COMPUTERNAME_LENGTH + 1] = {0};
+    TCHAR computer_name[MAX_COMPUTERNAME_LENGTH + 1] = { 0 };
     DWORD wait_result = 0;
     DWORD computer_name_length = MAX_COMPUTERNAME_LENGTH + 1;
 
     VMSG("PrintOutput\n");
 
     if (threads_handles) {
-        for (i=0; i < num_threads_total; i++) {
+        for (i = 0; i < num_threads_total; i++) {
             wait_result = WaitForSingleObject(threads_handles[i], wait_timeout_milliseconds);
             if (WAIT_OBJECT_0 != wait_result) {
                 PrintError("PrintOutput", "WaitForSingleObject");
@@ -4770,7 +4984,8 @@ PrintOutput(
         packets_received = perf_info->udp_end_stats.received - perf_info->udp_init_stats.received;
         packets_retransmitted = 0;
         packets_errors = perf_info->udp_end_stats.errors - perf_info->udp_init_stats.errors;
-    } else {
+    }
+    else {
         packets_sent = perf_info->tcp_end_stats.sent - perf_info->tcp_init_stats.sent;
         packets_received = perf_info->tcp_end_stats.received - perf_info->tcp_init_stats.received;
         packets_retransmitted =
@@ -4779,7 +4994,7 @@ PrintOutput(
     }
 
     if (flags.cpu_from_idle_flag) {
-        core_total_cycles = (ULONG64) (GetTestTime() * MhzToHz(proc_speed));
+        core_total_cycles = (ULONG64)(GetTestTime() * MhzToHz(proc_speed));
     }
 
     for (i = 0; i < num_processors; ++i) {
@@ -4790,7 +5005,8 @@ PrintOutput(
 
             core_idle_cycles = perf_info->end_cui->processor_idle_cycle_time[i] - perf_info->begin_cui->processor_idle_cycle_time[i];
             busy_time_prcnt = 100.00 * (1.0 - DivAndHandleZero((double)core_idle_cycles, (double)core_total_cycles));
-        } else {
+        }
+        else {
             idle_time_prcnt =
                 GetTimePercent(
                     perf_info->end_sppi[i].IdleTime.QuadPart - perf_info->begin_sppi[i].IdleTime.QuadPart,
@@ -4805,7 +5021,7 @@ PrintOutput(
                 GetTimePercent(
                     perf_info->end_sppi[i].KernelTime.QuadPart - perf_info->begin_sppi[i].KernelTime.QuadPart,
                     GetTestTime());
-                busy_time_prcnt = (kernel_time_prcnt + user_time_prcnt) - idle_time_prcnt;
+            busy_time_prcnt = (kernel_time_prcnt + user_time_prcnt) - idle_time_prcnt;
         }
 
         num_interrupts += perf_info->end_sppi[i].InterruptCount - perf_info->begin_sppi[i].InterruptCount;
@@ -4823,178 +5039,179 @@ PrintOutput(
 
         if (flags.send_flag) {
             fprintf(XMLFileHandle,
-                    "<ntttcps computername=\"%s\" version=\"%s\">\n",
-                    computer_name,
-                    NTTTCP_VERSION);
-        } else {
+                "<ntttcps computername=\"%s\" version=\"%s\">\n",
+                computer_name,
+                NTTTCP_VERSION);
+        }
+        else {
             fprintf(XMLFileHandle,
-                    "<ntttcpr computername=\"%s\" version=\"%s\">\n",
-                    computer_name,
-                    NTTTCP_VERSION);
+                "<ntttcpr computername=\"%s\" version=\"%s\">\n",
+                computer_name,
+                NTTTCP_VERSION);
         }
 
         fprintf(XMLFileHandle,
-                "\t<parameters>\n");
+            "\t<parameters>\n");
         fprintf(XMLFileHandle,
-                "\t\t<send_socket_buff>%d</send_socket_buff>\n",
-                send_socket_buff);
+            "\t\t<send_socket_buff>%d</send_socket_buff>\n",
+            send_socket_buff);
         fprintf(XMLFileHandle,
-                "\t\t<recv_socket_buff>%d</recv_socket_buff>\n",
-                recv_socket_buff);
+            "\t\t<recv_socket_buff>%d</recv_socket_buff>\n",
+            recv_socket_buff);
         fprintf(XMLFileHandle,
-                "\t\t<port>%d</port>\n",
-                port);
+            "\t\t<port>%d</port>\n",
+            port);
         fprintf(XMLFileHandle,
-                "\t\t<sync_port>%s</sync_port>\n",
-                (flags.sync_port ? "True" : "False"));
+            "\t\t<sync_port>%s</sync_port>\n",
+            (flags.sync_port ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<no_sync>%s</no_sync>\n",
-                (flags.no_sync ? "True" : "False"));
+            "\t\t<no_sync>%s</no_sync>\n",
+            (flags.no_sync ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<wait_timeout_milliseconds>%d</wait_timeout_milliseconds>\n",
-                (DWORD)wait_timeout_milliseconds);
+            "\t\t<wait_timeout_milliseconds>%d</wait_timeout_milliseconds>\n",
+            (DWORD)wait_timeout_milliseconds);
         fprintf(XMLFileHandle,
-                "\t\t<async>%s</async>\n",
-                (flags.async_flag ? "True" : "False"));
+            "\t\t<async>%s</async>\n",
+            (flags.async_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<verbose>%s</verbose>\n",
-                (flags.verbose_flag ? "True" : "False"));
+            "\t\t<verbose>%s</verbose>\n",
+            (flags.verbose_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<wsa>%s</wsa>\n",
-                (flags.wsa_flag ? "True" : "False"));
+            "\t\t<wsa>%s</wsa>\n",
+            (flags.wsa_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<use_ipv6>%s</use_ipv6>\n",
-                (flags.use_ipv6_flag ? "True" : "False"));
+            "\t\t<use_ipv6>%s</use_ipv6>\n",
+            (flags.use_ipv6_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<udp>%s</udp>\n",
-                (flags.udp_flag ? "True" : "False"));
+            "\t\t<udp>%s</udp>\n",
+            (flags.udp_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<udp_unconnected>%s</udp_unconnected>\n",
-                (flags.udp_unconnected_flag ? "True" : "False"));
+            "\t\t<udp_unconnected>%s</udp_unconnected>\n",
+            (flags.udp_unconnected_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<verify_data>%s</verify_data>\n",
-                (flags.verify_data_flag ? "True" : "False"));
+            "\t\t<verify_data>%s</verify_data>\n",
+            (flags.verify_data_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<wait_all>%s</wait_all>\n",
-                (flags.wait_all_flag ? "True" : "False"));
+            "\t\t<wait_all>%s</wait_all>\n",
+            (flags.wait_all_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<run_time>%d</run_time>\n",
-                run_time);
+            "\t\t<run_time>%d</run_time>\n",
+            run_time);
         fprintf(XMLFileHandle,
-                "\t\t<warmup_time>%d</warmup_time>\n",
-                warmup_time);
+            "\t\t<warmup_time>%d</warmup_time>\n",
+            warmup_time);
         fprintf(XMLFileHandle,
-                "\t\t<cooldown_time>%d</cooldown_time>\n",
-                cooldown_time);
+            "\t\t<cooldown_time>%d</cooldown_time>\n",
+            cooldown_time);
         fprintf(XMLFileHandle,
-                "\t\t<dash_n_timeout>%d</dash_n_timeout>\n",
-                dash_n_timeout);
+            "\t\t<dash_n_timeout>%d</dash_n_timeout>\n",
+            dash_n_timeout);
         fprintf(XMLFileHandle,
-                "\t\t<bind_sender>%s</bind_sender>\n",
-                (flags.bind_sender_flag ? "True" : "False"));
+            "\t\t<bind_sender>%s</bind_sender>\n",
+            (flags.bind_sender_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<sender_name>%s</sender_name>\n",
-                sender_name);
+            "\t\t<sender_name>%s</sender_name>\n",
+            sender_name);
         fprintf(XMLFileHandle,
-                "\t\t<max_active_threads>%d</max_active_threads>\n",
-                max_active_threads);
+            "\t\t<max_active_threads>%d</max_active_threads>\n",
+            max_active_threads);
         fprintf(XMLFileHandle,
-                "\t\t<udp_uso_size>%d</udp_uso_size>\n",
-                udp_uso_size);
+            "\t\t<udp_uso_size>%d</udp_uso_size>\n",
+            udp_uso_size);
         fprintf(XMLFileHandle,
-                "\t\t<udp_receive_coalescing>%d</udp_receive_coalescing>\n",
-                flags.udp_receive_coalescing);
+            "\t\t<udp_receive_coalescing>%d</udp_receive_coalescing>\n",
+            flags.udp_receive_coalescing);
         fprintf(XMLFileHandle, "\t\t<tp>%s</tp>\n",
-                (flags.tp_flag ? "True" : "False"));
+            (flags.tp_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<use_hvsocket_flag>%s</use_hvsocket_flag>\n",
-                (flags.use_hvsocket_flag ? "True" : "False"));
+            "\t\t<use_hvsocket_flag>%s</use_hvsocket_flag>\n",
+            (flags.use_hvsocket_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<no_stdio_buffer>%s</no_stdio_buffer>\n",
-                (flags.no_stdio_buffer ? "True" : "False"));
+            "\t\t<no_stdio_buffer>%s</no_stdio_buffer>\n",
+            (flags.no_stdio_buffer ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<throughput_Bpms>%d</throughput_Bpms>\n",
-                throughput_Bpms);
+            "\t\t<throughput_Bpms>%d</throughput_Bpms>\n",
+            throughput_Bpms);
         fprintf(XMLFileHandle,
-                "\t\t<cpu_burn>%d</cpu_burn>\n",
-                cpu_burn);
+            "\t\t<cpu_burn>%d</cpu_burn>\n",
+            cpu_burn);
         fprintf(XMLFileHandle,
-                "\t\t<latency_measurement>%s</latency_measurement>\n",
-                (flags.latency_measurement ? "True" : "False"));
+            "\t\t<latency_measurement>%s</latency_measurement>\n",
+            (flags.latency_measurement ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<use_io_compl_ports>%s</use_io_compl_ports>\n",
-                (flags.use_io_compl_ports ? "True" : "False"));
+            "\t\t<use_io_compl_ports>%s</use_io_compl_ports>\n",
+            (flags.use_io_compl_ports ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<cpu_from_idle_flag>%s</cpu_from_idle_flag>\n",
-                (flags.cpu_from_idle_flag ? "True" : "False"));
+            "\t\t<cpu_from_idle_flag>%s</cpu_from_idle_flag>\n",
+            (flags.cpu_from_idle_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<get_estats>%s</get_estats>\n",
-                (flags.get_estats ? "True" : "False"));
+            "\t\t<get_estats>%s</get_estats>\n",
+            (flags.get_estats ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<qos_flag>%s</qos_flag>\n",
-                (flags.qos_flag ? "True" : "False"));
+            "\t\t<qos_flag>%s</qos_flag>\n",
+            (flags.qos_flag ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<jitter_measurement>%s</jitter_measurement>\n",
-                (flags.jitter_measurement ? "True" : "False"));
+            "\t\t<jitter_measurement>%s</jitter_measurement>\n",
+            (flags.jitter_measurement ? "True" : "False"));
         fprintf(XMLFileHandle,
-                "\t\t<packet_spacing>%d</packet_spacing>\n",
-                jitter_packet_period);
+            "\t\t<packet_spacing>%d</packet_spacing>\n",
+            jitter_packet_period);
         fprintf(XMLFileHandle,
-                "\t</parameters>\n");
+            "\t</parameters>\n");
 
         for (i = 0; i < num_threads_total; ++i) {
-            throughput = DivAndHandleZero((double) perf_info->threads_perf_info[i].bytes_transferred,
-                                          GetTestTime());
+            throughput = DivAndHandleZero((double)perf_info->threads_perf_info[i].bytes_transferred,
+                GetTestTime());
             if (!flags.hide_per_thread_stats) {
                 fprintf(XMLFileHandle,
-                        "\t<thread index=\"%d\">\n",
-                        i);
+                    "\t<thread index=\"%d\">\n",
+                    i);
                 fprintf(XMLFileHandle,
-                        "\t\t<realtime metric=\"s\">%.3f</realtime>\n",
-                        GetWorkerTime(i));
+                    "\t\t<realtime metric=\"s\">%.3f</realtime>\n",
+                    GetWorkerTime(i));
                 fprintf(XMLFileHandle,
-                        "\t\t<throughput metric=\"KB/s\">%.3f</throughput>\n",
-                        BytesToKBytes(throughput));
+                    "\t\t<throughput metric=\"KB/s\">%.3f</throughput>\n",
+                    BytesToKBytes(throughput));
                 fprintf(XMLFileHandle,
-                        "\t\t<throughput metric=\"MB/s\">%.3f</throughput>\n",
-                        BytesToMBytes(throughput));
+                    "\t\t<throughput metric=\"MB/s\">%.3f</throughput>\n",
+                    BytesToMBytes(throughput));
                 fprintf(XMLFileHandle,
-                        "\t\t<throughput metric=\"mbps\">%.3f</throughput>\n",
-                        BytesToMbits(throughput));
+                    "\t\t<throughput metric=\"mbps\">%.3f</throughput>\n",
+                    BytesToMbits(throughput));
                 fprintf(XMLFileHandle,
-                        "\t\t<throughput metric=\"Bps\">%.1f</throughput>\n",
-                        throughput);
+                    "\t\t<throughput metric=\"Bps\">%.1f</throughput>\n",
+                    throughput);
                 fprintf(XMLFileHandle,
-                        "\t\t<avg_bytes_per_compl metric=\"B\">%.3f</avg_bytes_per_compl>\n",
-                        DivAndHandleZero((double) perf_info->threads_perf_info[i].bytes_transferred,
-                                        (double) perf_info->threads_perf_info[i].num_ios));
+                    "\t\t<avg_bytes_per_compl metric=\"B\">%.3f</avg_bytes_per_compl>\n",
+                    DivAndHandleZero((double)perf_info->threads_perf_info[i].bytes_transferred,
+                        (double)perf_info->threads_perf_info[i].num_ios));
 
                 if (flags.latency_measurement) {
 
                     int num_ios = !flags.roundtrip ? perf_info->threads_perf_info[i].num_ios :
-                                (perf_info->threads_perf_info[i].num_ios / 2);
+                        (perf_info->threads_perf_info[i].num_ios / 2);
                     fprintf(XMLFileHandle,
-                            "\t\t<avg_latency metric=\"ns\">%.0f</avg_latency>\n",
-                            LatencyToNs(DivAndHandleZero(perf_info->threads_perf_info[i].sum_latency, num_ios),
-                                        (double)machine_frequency.QuadPart));
+                        "\t\t<avg_latency metric=\"ns\">%.0f</avg_latency>\n",
+                        LatencyToNs(DivAndHandleZero(perf_info->threads_perf_info[i].sum_latency, num_ios),
+                            (double)machine_frequency.QuadPart));
                     fprintf(XMLFileHandle,
-                            "\t\t<min_latency metric=\"ns\">%.0f</min_latency>\n",
-                            LatencyToNs(perf_info->threads_perf_info[i].min_latency,
-                                        (double)machine_frequency.QuadPart));
+                        "\t\t<min_latency metric=\"ns\">%.0f</min_latency>\n",
+                        LatencyToNs(perf_info->threads_perf_info[i].min_latency,
+                            (double)machine_frequency.QuadPart));
                     fprintf(XMLFileHandle,
-                            "\t\t<max_latency metric=\"ns\">%.0f</max_latency>\n",
-                            LatencyToNs(perf_info->threads_perf_info[i].max_latency,
-                                        (double)machine_frequency.QuadPart));
+                        "\t\t<max_latency metric=\"ns\">%.0f</max_latency>\n",
+                        LatencyToNs(perf_info->threads_perf_info[i].max_latency,
+                            (double)machine_frequency.QuadPart));
                 }
 
                 if (flags.get_estats && perf_info->threads_perf_info[i].estats_available) {
-                    PCHAR text = (PCHAR) malloc(XMLNODE_ESTATS_MAXLENGTH);
+                    PCHAR text = (PCHAR)malloc(XMLNODE_ESTATS_MAXLENGTH);
 
                     if (NULL != text) {
-                        GetEStatsXml (perf_info->threads_perf_info[i].test_begin_estats, "Measurement_Begin", text);
-                        fprintf (XMLFileHandle, "%s\n", text);
-                        GetEStatsXml (perf_info->threads_perf_info[i].test_end_estats, "Measurement_End", text);
-                        fprintf (XMLFileHandle, "%s\n", text);
+                        GetEStatsXml(perf_info->threads_perf_info[i].test_begin_estats, "Measurement_Begin", text);
+                        fprintf(XMLFileHandle, "%s\n", text);
+                        GetEStatsXml(perf_info->threads_perf_info[i].test_end_estats, "Measurement_End", text);
+                        fprintf(XMLFileHandle, "%s\n", text);
 
                         free(text);
                     }
@@ -5009,7 +5226,7 @@ PrintOutput(
             total_iterations += perf_info->threads_perf_info[i].num_ios;
             threads_average_bytes_per_compl +=
                 DivAndHandleZero((double)perf_info->threads_perf_info[i].bytes_transferred,
-                                 perf_info->threads_perf_info[i].num_ios);
+                    perf_info->threads_perf_info[i].num_ios);
             total_num_ios += perf_info->threads_perf_info[i].num_ios;
             if (flags.latency_measurement) {
                 total_avg_latency += perf_info->threads_perf_info[i].sum_latency;
@@ -5020,7 +5237,7 @@ PrintOutput(
         }
 
         threads_average_bytes_per_compl = DivAndHandleZero(threads_average_bytes_per_compl,
-                                                           num_threads_total);
+            num_threads_total);
         if (flags.latency_measurement) {
             total_num_ios = !flags.roundtrip ? total_num_ios : (total_num_ios / 2);
             total_avg_latency = DivAndHandleZero(total_avg_latency, total_num_ios);
@@ -5028,112 +5245,115 @@ PrintOutput(
         total_throughput = DivAndHandleZero(total_bytes, GetTestTime());
 
         fprintf(XMLFileHandle,
-                "\t<total_bytes metric=\"MB\">%.6f</total_bytes>\n",
-                BytesToMBytes(total_bytes));
+            "\t<total_bytes metric=\"MB\">%.6f</total_bytes>\n",
+            BytesToMBytes(total_bytes));
         fprintf(XMLFileHandle,
-                "\t<realtime metric=\"s\">%.6f</realtime>\n",
-                GetTestTime());
+            "\t<realtime metric=\"s\">%.6f</realtime>\n",
+            GetTestTime());
         fprintf(XMLFileHandle,
-                "\t<avg_bytes_per_compl metric=\"B\">%.3f</avg_bytes_per_compl>\n",
-                DivAndHandleZero(total_bytes, total_iterations));
+            "\t<avg_bytes_per_compl metric=\"B\">%.3f</avg_bytes_per_compl>\n",
+            DivAndHandleZero(total_bytes, total_iterations));
         fprintf(XMLFileHandle,
-                "\t<threads_avg_bytes_per_compl metric=\"B\">%.3f</threads_avg_bytes_per_compl>\n",
-                threads_average_bytes_per_compl);
+            "\t<threads_avg_bytes_per_compl metric=\"B\">%.3f</threads_avg_bytes_per_compl>\n",
+            threads_average_bytes_per_compl);
         fprintf(XMLFileHandle,
-                "\t<avg_frame_size metric=\"B\">%.3f</avg_frame_size>\n",
-                DivAndHandleZero(total_bytes, (flags.send_flag ? (double)packets_sent : (double)packets_received)));
+            "\t<avg_frame_size metric=\"B\">%.3f</avg_frame_size>\n",
+            DivAndHandleZero(total_bytes, (flags.send_flag ? (double)packets_sent : (double)packets_received)));
         fprintf(XMLFileHandle,
-                "\t<throughput metric=\"MB/s\">%.3f</throughput>\n",
-                BytesToMBytes(total_throughput));
+            "\t<throughput metric=\"MB/s\">%.3f</throughput>\n",
+            BytesToMBytes(total_throughput));
         fprintf(XMLFileHandle,
-                "\t<throughput metric=\"mbps\">%.3f</throughput>\n",
-                BytesToMbits(total_throughput));
+            "\t<throughput metric=\"mbps\">%.3f</throughput>\n",
+            BytesToMbits(total_throughput));
         fprintf(XMLFileHandle,
-                "\t<throughput metric=\"Bps\">%.1f</throughput>\n",
-                total_throughput);
+            "\t<throughput metric=\"Bps\">%.1f</throughput>\n",
+            total_throughput);
         fprintf(XMLFileHandle,
-                "\t<total_buffers>%.3f</total_buffers>\n",
-                (total_throughput * GetTestTime()) / buffers_length);
+            "\t<total_buffers>%.3f</total_buffers>\n",
+            (total_throughput * GetTestTime()) / buffers_length);
         fprintf(XMLFileHandle,
-                "\t<throughput metric=\"buffers/s\">%.3f</throughput>\n",
-                total_throughput / buffers_length);
+            "\t<throughput metric=\"buffers/s\">%.3f</throughput>\n",
+            total_throughput / buffers_length);
         if (flags.latency_measurement) {
             fprintf(XMLFileHandle,
-                    "\t<avg_latency metric=\"ns\">%.0f</avg_latency>\n",
-                    LatencyToNs(total_avg_latency, (double)machine_frequency.QuadPart));
+                "\t<avg_latency metric=\"ns\">%.0f</avg_latency>\n",
+                LatencyToNs(total_avg_latency, (double)machine_frequency.QuadPart));
             fprintf(XMLFileHandle,
-                    "\t<min_latency metric=\"ns\">%.0f</min_latency>\n",
-                    LatencyToNs(total_min_latency, (double)machine_frequency.QuadPart));
+                "\t<min_latency metric=\"ns\">%.0f</min_latency>\n",
+                LatencyToNs(total_min_latency, (double)machine_frequency.QuadPart));
             fprintf(XMLFileHandle,
-                    "\t<max_latency metric=\"ns\">%.0f</max_latency>\n",
-                    LatencyToNs(total_max_latency, (double)machine_frequency.QuadPart));
+                "\t<max_latency metric=\"ns\">%.0f</max_latency>\n",
+                LatencyToNs(total_max_latency, (double)machine_frequency.QuadPart));
         }
         fprintf(XMLFileHandle,
-                "\t<avg_packets_per_interrupt metric=\"packets/interrupt\">%.3f"
-                "</avg_packets_per_interrupt>\n",
-                DivAndHandleZero((double)packets_received, num_interrupts));
+            "\t<avg_packets_per_interrupt metric=\"packets/interrupt\">%.3f"
+            "</avg_packets_per_interrupt>\n",
+            DivAndHandleZero((double)packets_received, num_interrupts));
         fprintf(XMLFileHandle,
-                "\t<interrupts metric=\"count/sec\">%.3f</interrupts>\n",
-                DivAndHandleZero(num_interrupts, GetTestTime()));
+            "\t<interrupts metric=\"count/sec\">%.3f</interrupts>\n",
+            DivAndHandleZero(num_interrupts, GetTestTime()));
         fprintf(XMLFileHandle,
-                "\t<dpcs metric=\"count/sec\">%.3f</dpcs>\n",
-                DivAndHandleZero(num_dpcs, GetTestTime()));
+            "\t<dpcs metric=\"count/sec\">%.3f</dpcs>\n",
+            DivAndHandleZero(num_dpcs, GetTestTime()));
         fprintf(XMLFileHandle,
-                "\t<avg_packets_per_dpc metric=\"packets/dpc\">%.3f"
-                "</avg_packets_per_dpc>\n",
-                DivAndHandleZero((double)packets_received, num_dpcs));
+            "\t<avg_packets_per_dpc metric=\"packets/dpc\">%.3f"
+            "</avg_packets_per_dpc>\n",
+            DivAndHandleZero((double)packets_received, num_dpcs));
         fprintf(XMLFileHandle,
-                "\t<cycles metric=\"cycles/byte\">%.3f</cycles>\n",
-                DivAndHandleZero(PrcntToFraction(total_busy_time_prcnt) * num_processors * MhzToHz(proc_speed),
-                                 total_throughput));
+            "\t<cycles metric=\"cycles/byte\">%.3f</cycles>\n",
+            DivAndHandleZero(PrcntToFraction(total_busy_time_prcnt) * num_processors * MhzToHz(proc_speed),
+                total_throughput));
         fprintf(XMLFileHandle,
-                "\t<packets_sent>%llu</packets_sent>\n",
-                packets_sent);
+            "\t<packets_sent>%llu</packets_sent>\n",
+            packets_sent);
         fprintf(XMLFileHandle,
-                "\t<packets_received>%llu</packets_received>\n",
-                packets_received);
+            "\t<packets_received>%llu</packets_received>\n",
+            packets_received);
         fprintf(XMLFileHandle,
-                "\t<packets_retransmitted>%d</packets_retransmitted>\n",
-                packets_retransmitted);
+            "\t<packets_retransmitted>%d</packets_retransmitted>\n",
+            packets_retransmitted);
         fprintf(XMLFileHandle,
-                "\t<errors>%d</errors>\n",
-                packets_errors);
+            "\t<errors>%d</errors>\n",
+            packets_errors);
         fprintf(XMLFileHandle,
-                "\t<cpu metric=\"%%\">%.3f</cpu>\n",
-                total_busy_time_prcnt);
+            "\t<cpu metric=\"%%\">%.3f</cpu>\n",
+            total_busy_time_prcnt);
         fprintf(XMLFileHandle,
-                "\t<num_processors>%d</num_processors>\n",
-                num_processors);
+            "\t<num_processors>%d</num_processors>\n",
+            num_processors);
         fprintf(XMLFileHandle,
-                "\t<bufferCount>%I64d</bufferCount>\n",
-                num_buffers_to_send);
+            "\t<bufferCount>%I64d</bufferCount>\n",
+            num_buffers_to_send);
         fprintf(XMLFileHandle,
-                "\t<bufferLen>%d</bufferLen>\n",
-                buffers_length);
+            "\t<bufferLen>%d</bufferLen>\n",
+            buffers_length);
         fprintf(XMLFileHandle,
-                "\t<io>%d</io>\n",
-                async_count);
+            "\t<io>%d</io>\n",
+            async_count);
 
         if (flags.send_flag) {
             fprintf(XMLFileHandle, "</ntttcps>\n");
-        } else {
+        }
+        else {
             fprintf(XMLFileHandle, "</ntttcpr>\n");
         }
-    } else {
+    }
+    else {
         // Text output mode
 
         if (!flags.hide_per_thread_stats) {
             if (flags.latency_measurement) {
                 printf(
-                        "\n                                               Latency(ns)"
-                        "\nThread  Time(s) Throughput(KB/s) Avg B / Compl        Avg        Min        Max\n");
+                    "\n                                               Latency(ns)"
+                    "\nThread  Time(s) Throughput(KB/s) Avg B / Compl        Avg        Min        Max\n");
                 printf(
-                        "======  ======= ================ ============= ========== ========== ==========\n");
-            } else {
+                    "======  ======= ================ ============= ========== ========== ==========\n");
+            }
+            else {
                 printf(
-                        "\n\nThread  Time(s) Throughput(KB/s) Avg B / Compl\n");
+                    "\n\nThread  Time(s) Throughput(KB/s) Avg B / Compl\n");
                 printf(
-                        "======  ======= ================ =============\n");
+                    "======  ======= ================ =============\n");
             }
         }
 
@@ -5161,7 +5381,8 @@ PrintOutput(
                         LatencyToNs(perf_info->threads_perf_info[i].min_latency, (double)machine_frequency.QuadPart),
                         LatencyToNs(perf_info->threads_perf_info[i].max_latency, (double)machine_frequency.QuadPart));
                 }
-            } else {
+            }
+            else {
                 if (!flags.hide_per_thread_stats) {
                     printf(
                         "%6d %8.3f %16.3f %13.3f\n",
@@ -5183,9 +5404,9 @@ PrintOutput(
         printf("\n\n   Bytes(MEG)    realtime(s) Avg Frame Size Throughput(MB/s)\n");
         printf("================ =========== ============== ================\n");
         printf("%16.6f %11.3f %14.3f %16.3f\n",
-               BytesToMBytes(total_bytes), GetTestTime(), DivAndHandleZero(total_bytes,
-                                                                           (flags.send_flag ? (double)packets_sent : (double)packets_received)),
-               BytesToMBytes(total_throughput));
+            BytesToMBytes(total_bytes), GetTestTime(), DivAndHandleZero(total_bytes,
+                (flags.send_flag ? (double)packets_sent : (double)packets_received)),
+            BytesToMBytes(total_throughput));
 
         if (flags.latency_measurement) {
             total_avg_latency = DivAndHandleZero(total_avg_latency, total_num_ios);
@@ -5193,18 +5414,18 @@ PrintOutput(
             printf("\n       Avg        Min        Max\n");
             printf("========== ========== ==========\n");
             printf("%10.0f %10.0f %10.0f\n",
-                   LatencyToNs(total_avg_latency, (double)machine_frequency.QuadPart),
-                   LatencyToNs(total_min_latency, (double)machine_frequency.QuadPart),
-                   LatencyToNs(total_max_latency, (double)machine_frequency.QuadPart));
+                LatencyToNs(total_avg_latency, (double)machine_frequency.QuadPart),
+                LatencyToNs(total_min_latency, (double)machine_frequency.QuadPart),
+                LatencyToNs(total_max_latency, (double)machine_frequency.QuadPart));
         }
 
         printf("\n\nThroughput(Buffers/s) Cycles/Byte       Buffers\n");
         printf("===================== =========== =============\n");
         printf("%21.3f %11.3f %13.3f\n",
-               DivAndHandleZero(frames_count, GetTestTime()),
-               DivAndHandleZero(PrcntToFraction(total_busy_time_prcnt) *
-                                num_processors * MhzToHz(proc_speed), total_throughput),
-               frames_count);
+            DivAndHandleZero(frames_count, GetTestTime()),
+            DivAndHandleZero(PrcntToFraction(total_busy_time_prcnt) *
+                num_processors * MhzToHz(proc_speed), total_throughput),
+            frames_count);
 
         printf("\n\n");
         printf("DPCs(count/s) Pkts(num/DPC)");
@@ -5212,19 +5433,19 @@ PrintOutput(
         printf("============= =============");
         printf(" =============== ==============\n");
         printf("%13.3f %13.3f   %13.3f  %13.3f\n",
-               DivAndHandleZero(num_dpcs, GetTestTime()),
-               DivAndHandleZero((double)packets_received, num_dpcs),
-               DivAndHandleZero(num_interrupts, GetTestTime()),
-               DivAndHandleZero((double)packets_received, num_interrupts));
+            DivAndHandleZero(num_dpcs, GetTestTime()),
+            DivAndHandleZero((double)packets_received, num_dpcs),
+            DivAndHandleZero(num_interrupts, GetTestTime()),
+            DivAndHandleZero((double)packets_received, num_interrupts));
 
         printf("\n\nPackets Sent Packets Received Retransmits Errors Avg. CPU %%\n");
         printf("============ ================ =========== ====== ==========\n");
         printf("%12llu %16llu %11d %6d %10.3f\n",
-               packets_sent,
-               packets_received,
-               packets_retransmitted,
-               packets_errors,
-               total_busy_time_prcnt);
+            packets_sent,
+            packets_received,
+            packets_retransmitted,
+            packets_errors,
+            total_busy_time_prcnt);
     }
 
     if (0 >= total_busy_time_prcnt) {
@@ -5236,12 +5457,12 @@ int
 __cdecl
 main(
     _In_ int argc,
-    _In_reads_(argc) LPSTR* argv
-    )
+    _In_reads_(argc) LPSTR * argv
+)
 {
     int err = NO_ERROR;
-    QOS_VERSION qos_version = {1 , 0};
-    WSADATA wd = {0};
+    QOS_VERSION qos_version = { 1 , 0 };
+    WSADATA wd = { 0 };
     HANDLE packet_send_timer_handle = NULL;
 
     MSG("Copyright Version %s\n", NTTTCP_VERSION);
@@ -5277,12 +5498,12 @@ main(
 
     if (!QueryPerformanceFrequency(&machine_frequency)) {
         MSG("WARNING: Cannot acquire machine frequency for "
-                "performance counters. Jitter and/or latency measurements are invalid.\n");
+            "performance counters. Jitter and/or latency measurements are invalid.\n");
         machine_frequency.QuadPart = 1;
     }
     machine_frequency_network_order = htonll((ULONGLONG)machine_frequency.QuadPart);
 
-    connect_semaphore = CreateSemaphore( NULL, MAX_CONCURRENT_CONNECT_COUNT, MAX_CONCURRENT_CONNECT_COUNT, NULL); // handle closed by process exit
+    connect_semaphore = CreateSemaphore(NULL, MAX_CONCURRENT_CONNECT_COUNT, MAX_CONCURRENT_CONNECT_COUNT, NULL); // handle closed by process exit
     if (connect_semaphore == NULL) {
         err = ERROR_MEMORY_ALLOC;
         goto exit;
@@ -5301,7 +5522,7 @@ main(
         }
     }
 
-    err = WSAStartup(MAKEWORD(2,0), &wd);
+    err = WSAStartup(MAKEWORD(2, 0), &wd);
     if (0 != err) {
         PrintFunctionError("WSAStartup", err);
         goto exit;
@@ -5334,7 +5555,8 @@ main(
             PrintOutput();
         }
         fprintf(XMLFileHandle, "</samples>\n");
-    } else {
+    }
+    else {
         perf_info = &perf_info_samples[0];
         PrintOutput();
     }
@@ -5362,7 +5584,7 @@ exit:
     if (flags.packet_spacing_flag) {
         timeEndPeriod(PS_MIN_TIMER_RESOLUTION);
         if (NULL != packet_send_timer_handle) {
-            if(!DeleteTimerQueueTimer(NULL, packet_send_timer_handle, NULL)) {
+            if (!DeleteTimerQueueTimer(NULL, packet_send_timer_handle, NULL)) {
                 PrintLocalError(__FUNCTION__, ERROR_CLOSING_TIMER_QUEUE_TIMER);
             }
         }
