@@ -4,7 +4,8 @@ Copyright (c) Microsoft Corporation.
 
 #define NTTTCP_VERSION "5.40" // TODO: Replace with VER_MAJOR "." VER_MINOR
 
-#define _CRT_SECURE_NO_WARNINGS 1 // Allow strtok, fopen, _ftime64
+#define _CRT_SECURE_NO_WARNINGS 1           // Allow strtok, fopen, _ftime64
+#define _WINSOCK_DEPRECATED_NO_WARNINGS 1   // Allow WSAAddressToStringA
 
 #include <assert.h>
 #define INCL_WINSOCK_API_TYPEDEFS 1
