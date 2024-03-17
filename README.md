@@ -8,23 +8,14 @@ See [Releases](https://github.com/microsoft/ntttcp/releases) section for binarie
 
 ## Building
 
-In a command prompt in the `src` directory run the following:
-
-> **Note** - Cmake 3.15 at minimum is required.
-
-```
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-```
-
-The binary will be at `build/Release/ntttcp.exe`
+1. Checkout the repository with submodules.
+1. Open the solution file `ntttcp.sln` in Visual Studio and build.
+1. The binary will be at `build/bin/amd64fre/ntttcp.exe`
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft 
-trademarks or logos is subject to and must follow 
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft
+trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
