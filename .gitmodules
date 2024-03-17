@@ -1,0 +1,3 @@
+[submodule "undocked"]
+	path = undocked
+	url = https://github.com/microsoft/undocked.git
