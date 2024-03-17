@@ -18,7 +18,7 @@ jobs:
         platform: [x64, ARM64]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@629c2de402a417ea7690ca6ce3f33229e27606a5
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce
     - name: Nuget Restore
