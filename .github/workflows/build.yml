@@ -10,22 +10,25 @@ permissions: read-all
 
 jobs:
   build:
-    permissions:
-      contents: read
     name: Build
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x64, ARM64]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@629c2de402a417ea7690ca6ce3f33229e27606a5
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      with:
+        submodules: recursive
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce
+    - name: Nuget Restore
+      run: nuget.exe restore ntttcp.sln
     - name: Build
-      run: |
-        cd src && mkdir build && cd build
-        cmake ..
-        cmake --build . --config Release
+      run: msbuild ntttcp.sln /p:Configuration=Release /p:Platform=${{ matrix.platform }}
     - name: Upload
       uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8
       with:
-        name: bin
-        path: |
-          src/build/Release/*.pdb
-          src/build/Release/*.exe
+        name: bin-${{ matrix.platform }}
+        path: build/bin

@@ -1,0 +1,12 @@
+//
+//    Copyright (C) Microsoft.  All rights reserved.
+//
+
+#include <windows.h>
+
+#define VER_FILEDESCRIPTION_STR     "NT TCP Performance Tool"
+#define VER_INTERNALNAME_STR        "ntttcp.exe"
+#define	VER_FILETYPE	            VFT_APP
+#define	VER_FILESUBTYPE	            VFT2_UNKNOWN
+
+#include "undocked.ver"

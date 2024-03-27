@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{fd254344-82b5-40c1-b1da-0ce24ca5ddd4}</ProjectGuid>
+    <TargetName>ntttcp</TargetName>
+    <UndockedType>exe</UndockedType>
+    <UndockedUseDriverToolset>true</UndockedUseDriverToolset>
+    <UndockedDir>$(SolutionDir)undocked\</UndockedDir>
+    <UndockedSourceLink>true</UndockedSourceLink>
+  </PropertyGroup>
+  <Import Project="$(UndockedDir)vs\windows.undocked.props" />
+  <ItemGroup>
+    <ClCompile Include="ntttcp.c" />
+    <ResourceCompile Include="ntttcp.rc" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;iphlpapi.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(UndockedDir)vs\windows.undocked.targets" />
+</Project>

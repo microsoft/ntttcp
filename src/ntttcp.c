@@ -2,7 +2,10 @@
 Copyright (c) Microsoft Corporation.
 */
 
-#define NTTTCP_VERSION "5.39"
+#define NTTTCP_VERSION "5.40" // TODO: Replace with VER_MAJOR "." VER_MINOR
+
+#define _CRT_SECURE_NO_WARNINGS 1           // Allow strtok, fopen, _ftime64
+#define _WINSOCK_DEPRECATED_NO_WARNINGS 1   // Allow WSAAddressToStringA
 
 #include <assert.h>
 #define INCL_WINSOCK_API_TYPEDEFS 1
@@ -22,6 +25,9 @@ Copyright (c) Microsoft Corporation.
 #include <qos2.h>
 #include <Mmsystem.h>
 #include <hvsocket.h>
+
+#pragma warning(disable:28159) // Consider using 'GetTickCount64' instead of 'GetTickCount'.Reason: GetTickCount overflows roughly every 49 days.
+#pragma warning(disable:4459) // C4459: declaration of '*' hides global declaration
 
 typedef struct _ASYNCH_BUFFER {
     OVERLAPPED overlapped; // <- This needs to be first parameter!
@@ -311,9 +317,39 @@ FARPROC lpNtQuerySystemInformation;
 FARPROC lpQueryIdleProcessorCycleTime;
 FARPROC lpGetTcp6Table;
 FARPROC lpSetPerTcp6ConnectionEStats;
-FARPROC lpGetPerTcp6ConnectionEStats;
+typedef
+ULONG
+(WINAPI* _GetPerTcp6ConnectionEStats)(
+    _In_ PMIB_TCP6ROW Row,
+    _In_ TCP_ESTATS_TYPE EstatsType,
+    _Out_writes_bytes_opt_(RwSize) PUCHAR Rw,
+    _In_  ULONG RwVersion,
+    _In_  ULONG RwSize,
+    _Out_writes_bytes_opt_(RosSize) PUCHAR Ros,
+    _In_  ULONG RosVersion,
+    _In_  ULONG RosSize,
+    _Out_writes_bytes_opt_(RodSize) PUCHAR Rod,
+    _In_  ULONG RodVersion,
+    _In_  ULONG RodSize
+    );
+_GetPerTcp6ConnectionEStats lpGetPerTcp6ConnectionEStats;
 FARPROC lpSetPerTcpConnectionEStats;
-FARPROC lpGetPerTcpConnectionEStats;
+typedef
+ULONG
+(WINAPI* _GetPerTcpConnectionEStats)(
+    _In_ PMIB_TCPROW Row,
+    _In_ TCP_ESTATS_TYPE EstatsType,
+    _Out_writes_bytes_opt_(RwSize) PUCHAR Rw,
+    _In_ ULONG RwVersion,
+    _In_ ULONG RwSize,
+    _Out_writes_bytes_opt_(RosSize) PUCHAR Ros,
+    _In_ ULONG RosVersion,
+    _In_ ULONG RosSize,
+    _Out_writes_bytes_opt_(RodSize) PUCHAR Rod,
+    _In_ ULONG RodVersion,
+    _In_ ULONG RodSize
+    );
+_GetPerTcpConnectionEStats lpGetPerTcpConnectionEStats;
 
 LPFN_TRANSMITPACKETS TransmitPackets;
 GUID TransmitPacketsGuid = WSAID_TRANSMITPACKETS;
@@ -593,12 +629,14 @@ GetTcpRow(
     }
 
     if (!FindMatchingRow(&local_name, &remote_name, tcp_table, is_v6, row)) {
-        row = NULL;
         status = ERROR_NOT_FOUND;
         goto exit;
     }
 
+    return NO_ERROR;
+
 exit:
+    row = NULL;
     if (tcp_table) {
         free(tcp_table);
         tcp_table = NULL;
@@ -785,8 +823,8 @@ ExtractPerTcpEStats(
     _In_ const BOOL is_v6,
     _In_ const PVOID row,
     _In_ const TCP_ESTATS_TYPE estats_type,
-    _Out_ PUCHAR ros,
-    _Out_ PUCHAR rod)
+    _Out_opt_ PUCHAR ros,
+    _Out_opt_ PUCHAR rod)
 {
     BOOL ret_val = TRUE;
     ULONG ros_size = 0;
@@ -1383,7 +1421,7 @@ InitDLLs(
         goto error_get_proc_address;
     }
 
-    lpGetPerTcp6ConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcp6ConnectionEStats");
+    lpGetPerTcp6ConnectionEStats = (_GetPerTcp6ConnectionEStats)GetProcAddress(IPHlpModuleHandle, "GetPerTcp6ConnectionEStats");
     if (NULL == lpGetPerTcp6ConnectionEStats) {
         goto error_get_proc_address;
     }
@@ -1393,7 +1431,7 @@ InitDLLs(
         goto error_get_proc_address;
     }
 
-    lpGetPerTcpConnectionEStats = GetProcAddress(IPHlpModuleHandle, "GetPerTcpConnectionEStats");
+    lpGetPerTcpConnectionEStats = (_GetPerTcpConnectionEStats)GetProcAddress(IPHlpModuleHandle, "GetPerTcpConnectionEStats");
     if (NULL == lpGetPerTcpConnectionEStats) {
         goto error_get_proc_address;
     }
@@ -1410,7 +1448,9 @@ error_get_proc_address:
     } else if (NULL != CoreRealtimeModuleHandle) {
         FreeLibrary(CoreRealtimeModuleHandle);
     }
-    FreeLibrary(QWaveModuleHandle);
+    if (NULL != QWaveModuleHandle) {
+        FreeLibrary(QWaveModuleHandle);
+    }
     WSockModuleHandle = NULL;
     IPHlpModuleHandle = NULL;
     NtDllModuleHandle = NULL;
@@ -1907,8 +1947,8 @@ KBpsToBpms(
 
 BOOL
 ProcessArgs(
-    int argc,
-    _In_reads_(argc) LPSTR* argv
+    _In_ int argc,
+    _In_reads_(argc) _Null_terminated_ char* argv[]
     )
 {
     int i = 1;
@@ -1940,7 +1980,7 @@ ProcessArgs(
         flags.send_flag = FALSE;
     }
 
-    while ((i+1) <= argc) {
+    while ((i+1) <= argc && argv[i]) {
         if (0 == _stricmp(argv[i], "-s")) {
             flags.send_flag = TRUE;
             ++i;
@@ -3245,14 +3285,16 @@ DoSendsReceives(
     }
 
     while (num_ios < max_num_ios) {
-        if (start_recording_results && !time0_was_set) {
-            _ftime(&time0);
-            GetEstats(tcp_row, &test_begin_estats);
-            time0_was_set = TRUE;
-        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
-            _ftime(&time1);
-            GetEstats(tcp_row, &test_end_estats);
-            time1_was_set = TRUE;
+        if (tcp_row) {
+            if (start_recording_results && !time0_was_set) {
+                _ftime(&time0);
+                GetEstats(tcp_row, &test_begin_estats);
+                time0_was_set = TRUE;
+            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+                _ftime(&time1);
+                GetEstats(tcp_row, &test_end_estats);
+                time1_was_set = TRUE;
+            }
         }
 
         if (test_finished) break;
@@ -3510,7 +3552,7 @@ PostAsynchBuffer(
 _Success_(return == NO_ERROR)
 int GetCompletedIO(
     _In_ HANDLE io_compl_port,
-    _In_reads_(async_count + 1) HANDLE * events,
+    _In_reads_opt_(async_count + 1) HANDLE * events,
     _In_reads_(async_count) PASYNCH_BUFFER const buffers,
     _Out_ PASYNCH_BUFFER * buffer_ptr,
     _Out_ long * const bytes_sent_received_ptr
@@ -3538,6 +3580,7 @@ int GetCompletedIO(
             }
         } else {
             // WSAWaitForMultipleEvents works basically the same.
+            _Analysis_assume_(events);
             wait_result = WaitForMultipleObjects(async_count + 1,
                                                  events,
                                                  FALSE,
@@ -3685,15 +3728,16 @@ DoAsynchSendsReceives(
     }
 
     while(num_ios < max_num_ios) {
-        if (start_recording_results && !time0_was_set) {
-            _ftime(&time0);
-            GetEstats(tcp_row, &test_begin_estats);
-            time0_was_set = TRUE;
-        }
-        else if (time0_was_set && !start_recording_results && !time1_was_set) {
-            _ftime(&time1);
-            GetEstats(tcp_row, &test_end_estats);
-            time1_was_set = TRUE;
+        if (tcp_row) {
+            if (start_recording_results && !time0_was_set) {
+                _ftime(&time0);
+                GetEstats(tcp_row, &test_begin_estats);
+                time0_was_set = TRUE;
+            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+                _ftime(&time1);
+                GetEstats(tcp_row, &test_end_estats);
+                time1_was_set = TRUE;
+            }
         }
 
         if (test_finished) {
@@ -3934,11 +3978,15 @@ AllocateAsynchBuffers(
             //
             // Fill buffer.
             //
+#pragma warning(push)
+#pragma warning(disable:6386) // Buffer overrun while writing to 'asynch_buffers'
+#pragma warning(disable:6385) // Reading invalid data from 'asynch_buffers'
             asynch_buffers[i].buffer = (char *) calloc(buffers_length, sizeof(char));
 
             if (NULL == asynch_buffers[i].buffer) {
                 goto exit;
             }
+#pragma warning(pop)
 
             memset(asynch_buffers[i].buffer, 'A', buffers_length * sizeof(char));
 
@@ -4366,7 +4414,7 @@ DoWork(
         SOCKET listening_socket = SetupNet(maps[0].receiver_name, sender_name, port,
             flags.use_hvsocket_flag, FALSE, FALSE, FALSE, FALSE, FALSE,
             flags.bind_sender_flag, num_threads_total, FALSE);
-        for (int i = 0; i < num_threads_total; ++i) {
+        for (i = 0; i < num_threads_total; ++i) {
             SOCKET socket = accept(listening_socket, NULL, 0);
             if (INVALID_SOCKET == socket) {
                 closesocket(listening_socket);
@@ -4503,8 +4551,8 @@ DoWork(
         //
         // Here all threads are actually running test (recording results)
         //
-        for (int i = 0; i < num_samples; ++i) {
-            ULONG64 count0 = GetCountTimeStamp();
+        for (i = 0; i < num_samples; ++i) {
+            count0 = GetCountTimeStamp();
             perf_info = &perf_info_samples[i];
             VMSG("start recording results for sample %d\n", i);
             start_recording_results = TRUE;
@@ -4529,7 +4577,7 @@ DoWork(
             }
             VMSG("stop recording results for sample %d\n", i);
             start_recording_results = FALSE;
-            ULONG64 count1 = GetCountTimeStamp();
+            count1 = GetCountTimeStamp();
             perf_info->actual_run_time = GetCountDeltaInMicroseconds(count0, count1);
         }
 
@@ -5236,7 +5284,7 @@ int
 __cdecl
 main(
     _In_ int argc,
-    _In_reads_(argc) LPSTR* argv
+    _In_reads_(argc) _Null_terminated_ char* argv[]
     )
 {
     int err = NO_ERROR;
