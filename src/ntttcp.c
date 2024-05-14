@@ -633,6 +633,7 @@ GetTcpRow(
         goto exit;
     }
 
+    free(tcp_table);
     return NO_ERROR;
 
 exit:
