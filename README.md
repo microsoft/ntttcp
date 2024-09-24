@@ -8,7 +8,7 @@ See [Releases](https://github.com/microsoft/ntttcp/releases) section for binarie
 
 ## Building
 
-1. Clone the repository with submodules.
+1. Clone the repository with submodules: `git clone --recursive https://github.com/microsoft/ntttcp`
 1. Open the solution file `ntttcp.sln` in Visual Studio and build.
 1. The binary will be at `build/bin/amd64fre/ntttcp.exe`
 
