@@ -824,7 +824,7 @@ ExtractPerTcpEStats(
     _In_ const BOOL is_v6,
     _In_ const PVOID row,
     _In_ const TCP_ESTATS_TYPE estats_type,
-    _Out_opt_ PUCHAR ros,
+    _Out_writes_bytes_opt_(_Inexpressible_("size from GetRodRosSize")) PUCHAR ros,
     _Out_opt_ PUCHAR rod)
 {
     BOOL ret_val = TRUE;
