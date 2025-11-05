@@ -18,17 +18,17 @@ jobs:
         platform: [x64, ARM64]
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       with:
         submodules: recursive
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+      uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2.0.0
     - name: Nuget Restore
       run: nuget.exe restore ntttcp.sln
     - name: Build
       run: msbuild ntttcp.sln /p:Configuration=Release /p:Platform=${{ matrix.platform }}
     - name: Upload
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: bin-${{ matrix.platform }}
         path: build/bin
