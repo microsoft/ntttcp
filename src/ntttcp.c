@@ -3286,16 +3286,18 @@ DoSendsReceives(
     }
 
     while (num_ios < max_num_ios) {
-        if (tcp_row) {
-            if (start_recording_results && !time0_was_set) {
-                _ftime(&time0);
+        if (start_recording_results && !time0_was_set) {
+            _ftime(&time0);
+            if (tcp_row) {
                 GetEstats(tcp_row, &test_begin_estats);
-                time0_was_set = TRUE;
-            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
-                _ftime(&time1);
-                GetEstats(tcp_row, &test_end_estats);
-                time1_was_set = TRUE;
             }
+            time0_was_set = TRUE;
+        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+            _ftime(&time1);
+            if (tcp_row) {
+                GetEstats(tcp_row, &test_end_estats);
+            }
+            time1_was_set = TRUE;
         }
 
         if (test_finished) break;
@@ -3729,16 +3731,18 @@ DoAsynchSendsReceives(
     }
 
     while(num_ios < max_num_ios) {
-        if (tcp_row) {
-            if (start_recording_results && !time0_was_set) {
-                _ftime(&time0);
+        if (start_recording_results && !time0_was_set) {
+            _ftime(&time0);
+            if (tcp_row) {
                 GetEstats(tcp_row, &test_begin_estats);
-                time0_was_set = TRUE;
-            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
-                _ftime(&time1);
-                GetEstats(tcp_row, &test_end_estats);
-                time1_was_set = TRUE;
             }
+            time0_was_set = TRUE;
+        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+            _ftime(&time1);
+            if (tcp_row) {
+                GetEstats(tcp_row, &test_end_estats);
+            }
+            time1_was_set = TRUE;
         }
 
         if (test_finished) {
