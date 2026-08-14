@@ -856,7 +856,7 @@ exit:
 _Success_(return == TRUE)
 BOOL
 GetEstats(
-    __in const PVOID tcp_row,
+    __in_opt const PVOID tcp_row,
     __out PESTATS_DATA estats_data
     )
 {
