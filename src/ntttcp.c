@@ -3453,7 +3453,7 @@ DoSendsReceives(
             time0_was_set && time1_was_set ?
                 MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
                 0;
-        if (flags.get_estats) {
+        if (flags.get_estats && test_begin_estats.is_valid_data && test_end_estats.is_valid_data) {
             ASSERT ( NULL != local_perf_info->test_begin_estats);
             ASSERT ( NULL != local_perf_info->test_end_estats);
 
@@ -3880,7 +3880,7 @@ DoAsynchSendsReceives(
             time0_was_set && time1_was_set ?
                 MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
                 0;
-        if (flags.get_estats) {
+        if (flags.get_estats && test_begin_estats.is_valid_data && test_end_estats.is_valid_data) {
             ASSERT ( NULL != local_perf_info->test_begin_estats);
             ASSERT ( NULL != local_perf_info->test_end_estats);
 
