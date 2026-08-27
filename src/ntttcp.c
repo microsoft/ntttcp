@@ -3286,16 +3286,18 @@ DoSendsReceives(
     }
 
     while (num_ios < max_num_ios) {
-        if (tcp_row) {
-            if (start_recording_results && !time0_was_set) {
-                _ftime(&time0);
+        if (start_recording_results && !time0_was_set) {
+            _ftime(&time0);
+            if (tcp_row) {
                 GetEstats(tcp_row, &test_begin_estats);
-                time0_was_set = TRUE;
-            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
-                _ftime(&time1);
-                GetEstats(tcp_row, &test_end_estats);
-                time1_was_set = TRUE;
             }
+            time0_was_set = TRUE;
+        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+            _ftime(&time1);
+            if (tcp_row) {
+                GetEstats(tcp_row, &test_end_estats);
+            }
+            time1_was_set = TRUE;
         }
 
         if (test_finished) break;
@@ -3421,7 +3423,9 @@ DoSendsReceives(
         }
 
         _ftime(&time1);
-        GetEstats(tcp_row, &test_end_estats);
+        if (tcp_row) {
+            GetEstats(tcp_row, &test_end_estats);
+        }
         time1_was_set = TRUE;
     }
 
@@ -3451,7 +3455,7 @@ DoSendsReceives(
             time0_was_set && time1_was_set ?
                 MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
                 0;
-        if (flags.get_estats) {
+        if (flags.get_estats && tcp_row) {
             ASSERT ( NULL != local_perf_info->test_begin_estats);
             ASSERT ( NULL != local_perf_info->test_end_estats);
 
@@ -3729,16 +3733,18 @@ DoAsynchSendsReceives(
     }
 
     while(num_ios < max_num_ios) {
-        if (tcp_row) {
-            if (start_recording_results && !time0_was_set) {
-                _ftime(&time0);
+        if (start_recording_results && !time0_was_set) {
+            _ftime(&time0);
+            if (tcp_row) {
                 GetEstats(tcp_row, &test_begin_estats);
-                time0_was_set = TRUE;
-            } else if (time0_was_set && !start_recording_results && !time1_was_set) {
-                _ftime(&time1);
-                GetEstats(tcp_row, &test_end_estats);
-                time1_was_set = TRUE;
             }
+            time0_was_set = TRUE;
+        } else if (time0_was_set && !start_recording_results && !time1_was_set) {
+            _ftime(&time1);
+            if (tcp_row) {
+                GetEstats(tcp_row, &test_end_estats);
+            }
+            time1_was_set = TRUE;
         }
 
         if (test_finished) {
@@ -3840,7 +3846,9 @@ DoAsynchSendsReceives(
         }
 
         _ftime(&time1);
-        GetEstats(tcp_row, &test_end_estats);
+        if (tcp_row) {
+            GetEstats(tcp_row, &test_end_estats);
+        }
         time1_was_set = TRUE;
     }
 
@@ -3876,7 +3884,7 @@ DoAsynchSendsReceives(
             time0_was_set && time1_was_set ?
                 MS2S * (time1.time - time0.time) + (time1.millitm - time0.millitm) :
                 0;
-        if (flags.get_estats) {
+        if (flags.get_estats && tcp_row) {
             ASSERT ( NULL != local_perf_info->test_begin_estats);
             ASSERT ( NULL != local_perf_info->test_end_estats);
 
