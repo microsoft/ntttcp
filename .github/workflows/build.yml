@@ -25,6 +25,9 @@ jobs:
       uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2.0.0
     - name: Nuget Restore
       run: nuget.exe restore ntttcp.sln
+    - name: Per-thread throughput regression test
+      shell: pwsh
+      run: ./tests/test_per_thread_throughput.ps1
     - name: Build
       run: msbuild ntttcp.sln /p:Configuration=Release /p:Platform=${{ matrix.platform }}
     - name: Upload
