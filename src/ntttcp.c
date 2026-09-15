@@ -267,6 +267,7 @@ typedef BOOL (CALLBACK *LPFN_QOSREMOVESOCKETFROMFLOW) (
 #define PS_MIN_TIMER_RESOLUTION 1 // 1 ms
 #define PS_TIMER_START_OFFSET 20 // 20 ms
 #define MAX_ERROR_BUFFER_SIZE 256
+#define JITTER_HEADER_SIZE (sizeof(ULONG) + sizeof(ULONGLONG) + sizeof(ULONGLONG)) // packet_num + send_count + send_freq, embedded by AddPayloadToBuffer()
 
 #define ERROR_MEMORY_ALLOC                  1
 #define ERROR_CREATE_EVENT                  2
@@ -3107,6 +3108,18 @@ AddPayloadToBuffer(
 // Reads "<packet number>,<performance counter count>,<performance counter frequency>" (from sender)
 // from buffer and writes that in addition to perf cnt (recv) and perf cnt freq (recv)
 // This can be analyzed to find packet jitter and change in one way delay
+//
+// CALLER'S RESPONSIBILITY (bug fix, see DoSendsReceives): AddPayloadToBuffer()
+// embeds this header exactly once, at the START of each logical buffer_length-
+// sized buffer the sender hands to send(). On a stream socket, one recv() call
+// does NOT correspond to one such buffer - the OS is free to deliver it in many
+// smaller chunks, especially once buffer_length exceeds a single TCP segment/
+// receive-buffer's worth (e.g. -l 1M). Calling this on every raw recv() return
+// therefore decodes whatever bytes happen to be at THAT chunk's offset 0, most
+// of which are mid-buffer payload, not a header - observed live as a CSV where
+// most rows decode to the buffer's own fill pattern instead of real counters.
+// The caller must only invoke this once per logical buffer, at the recv() that
+// starts a new one - see the jitter_buffer_offset tracking in DoSendsReceives.
 void
 OutputPayloadFromBuffer(
     char * buffer,
@@ -3214,6 +3227,11 @@ DoSendsReceives(
     ESTATS_DATA test_begin_estats = {0};
     ESTATS_DATA test_end_estats = {0};
     PVOID tcp_row = NULL;
+    // Bug fix (jitter CSV corruption): bytes already consumed into the CURRENT
+    // logical buffer_length-sized buffer, so the jitter header is only decoded
+    // once per buffer - at the recv() that lands on its start - not on every
+    // raw recv() return. See OutputPayloadFromBuffer()'s own comment.
+    ULONGLONG jitter_buffer_offset = 0;
 
     time_perf_count_0.QuadPart = 0;
     time_perf_count_1.QuadPart = 0;
@@ -3368,7 +3386,17 @@ DoSendsReceives(
             }
 
             if (flags.jitter_measurement) {
-                OutputPayloadFromBuffer(buffer, bytes_received);
+                // Only decode a header when this recv() starts a fresh logical
+                // buffer (offset 0) and actually carries enough bytes for one -
+                // never from the middle of a buffer_length-sized transfer that
+                // arrived split across multiple recv() calls. A recv() that
+                // lands mid-buffer is skipped for jitter purposes (no header to
+                // find in it); the offset still advances so later recv()s stay
+                // aligned to the real buffer boundaries on the wire.
+                if (0 == jitter_buffer_offset && bytes_received >= (long)JITTER_HEADER_SIZE) {
+                    OutputPayloadFromBuffer(buffer, bytes_received);
+                }
+                jitter_buffer_offset = (jitter_buffer_offset + (ULONGLONG)bytes_received) % (ULONGLONG)buffer_length;
             }
 
             if (flags.roundtrip) {
