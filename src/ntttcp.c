@@ -254,6 +254,9 @@ typedef BOOL (CALLBACK *LPFN_QOSREMOVESOCKETFROMFLOW) (
 #define MAX_ASYNCH_IO_WAIT_COUNT 1 // fail after 1 timeout; set higher to enable debug output for long IOs
 #define RECEIVER_TIMEOUT 2000 // 2s
 #define WORKER_THREAD_FINISHED_TIMEOUT 2000 // 2s
+#define END_OF_TEST_GRACE_PERIOD 1000 // 1s; how long before the expected end of a timed
+                                      // test a graceful close by the peer is considered
+                                      // to be the normal end of the test
 #define SENDER_SLEEP_BETWEEN_RECONNECT 100 // 0.1s
 #define SENDER_CONNECTION_RETRIES 100 // at least 10s to connect total, but may be higher
 #define MAX_CONCURRENT_CONNECT_COUNT 10 // smaller = more RTTs until test starts
@@ -393,6 +396,7 @@ MAP maps[MAX_MAPPINGS];
 HANDLE* threads_handles = NULL;
 volatile BOOL start_recording_results = FALSE;
 volatile BOOL test_finished = FALSE;
+volatile DWORD test_expected_end_time = 0;
 volatile PPERF_INFO perf_info = NULL;
 PPERF_INFO perf_info_samples = NULL;
 QOS_TRAFFIC_TYPE qos_priority = QOSTrafficTypeBestEffort;
@@ -3159,6 +3163,44 @@ enum {
     S_RECV
 };
 
+/* Tells whether an orderly shutdown of the connection by the peer is expected.
+
+   recv() returning 0 is the standard TCP notification that the peer performed
+   an orderly shutdown; it is not necessarily an error. It is how a time bounded
+   test normally ends: the peer closes its sockets as soon as its own duration
+   elapses, which may happen slightly before this side's test timer fires - in
+   that case the last recv() call lands after the peer's close instead of
+   picking up one more buffer.
+
+   Returns:
+       TRUE: if the test is over, or close enough to its expected end that a
+             close initiated by the peer is the expected end of the stream,
+       FALSE: otherwise, i.e. the peer disconnected while data was still
+              expected.
+*/
+BOOL
+IsPeerCloseExpected(
+    void
+    )
+{
+    if (test_finished) {
+        return TRUE;
+    }
+
+    if (!flags.time_flag || 0 == test_expected_end_time) {
+        //
+        // The test is not time bounded, so there is no point in time at which
+        // the peer is expected to close the connection.
+        //
+        return FALSE;
+    }
+
+    //
+    // Unsigned arithmetic makes the comparison immune to GetTickCount wrapping.
+    //
+    return ((LONG) (test_expected_end_time - GetTickCount()) <= END_OF_TEST_GRACE_PERIOD);
+}
+
 /* Sends num_sends buffer-s through socket.
 
    Having a socket descriptor and a buffer, sends the buffer num_sends times.
@@ -3354,8 +3396,18 @@ DoSendsReceives(
                 VMSG("WARNING: %s: recv/recvfrom returned %d port %d thread %d\n", __FUNCTION__, err, php->port, php->index);
                 break;
             } else if (0 == bytes_received) {
-                PrintError(__FUNCTION__, "Unexpected disconnect");
-                err = ERROR_SEND_RECV;
+                //
+                // The peer performed an orderly shutdown. Only report it as a
+                // failure if data was still expected, otherwise it is just the
+                // peer finishing the test slightly ahead of us.
+                //
+                if (IsPeerCloseExpected()) {
+                    VMSG("%s: peer closed the connection at the end of the test, port %d thread %d\n",
+                         __FUNCTION__, php->port, php->index);
+                } else {
+                    PrintError(__FUNCTION__, "Unexpected disconnect");
+                    err = ERROR_SEND_RECV;
+                }
                 break;
             }
 
@@ -4536,6 +4588,14 @@ DoWork(
     if (flags.time_flag) {
 
         VMSG("test start\n");
+
+        //
+        // Record when this side expects the test to be over, so that worker
+        // threads can tell a normal end of test close by the peer apart from an
+        // unexpected disconnect.
+        //
+        test_expected_end_time = GetTickCount() + warmup_time + run_time + cooldown_time;
+
         if (!SetEvent(start_test)) {
             err = ERROR_SET_EVENT;
             goto exit; // don't cleanup since some threads might be using that memory
