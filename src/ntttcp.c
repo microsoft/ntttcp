@@ -133,7 +133,7 @@ typedef struct _ESTATS_DATA {
 } ESTATS_DATA, *PESTATS_DATA;
 
 typedef struct DECLSPEC_CACHEALIGN _THREAD_PERF_INFO {
-    long sum_latency;
+    long long sum_latency;
     long min_latency;
     long max_latency;
     long num_ios;
@@ -3393,7 +3393,7 @@ DoSendsReceives(
 
                 latency = latency > MAXLONG ? MAXLONG : latency;
 
-                local_perf_info->sum_latency += (long) latency;
+                local_perf_info->sum_latency += latency;
                 local_perf_info->min_latency = min((long) latency, local_perf_info->min_latency);
                 local_perf_info->max_latency = max((long) latency, local_perf_info->max_latency);
             }
@@ -3816,7 +3816,7 @@ DoAsynchSendsReceives(
 
                     latency = (latency > MAXLONG ? MAXLONG : latency);
 
-                    local_perf_info->sum_latency += (long) latency;
+                    local_perf_info->sum_latency += latency;
 
                     local_perf_info->min_latency = min((long) latency, local_perf_info->min_latency);
                     local_perf_info->max_latency = max((long) latency, local_perf_info->max_latency);
